@@ -1,0 +1,4 @@
+
+    1 el estudiante Neils pertenece al pais de Bolivia
+    2 el estudiante Natanael pertenece al pais de Argentina
+    3 el estudiante Felipe pertenece al pais de Brasil

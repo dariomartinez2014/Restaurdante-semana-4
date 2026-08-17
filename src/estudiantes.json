@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "nombre": "Neils",
+    "pais": "Bolivia",
+    "notas": [
+      89,
+      20,
+      55
+    ]
+  },
+  {
+    "id": 2,
+    "nombre": "Natanael",
+    "pais": "Argentina",
+    "notas": [
+      78,
+      70,
+      100
+    ]
+  },
+  {
+    "id": 3,
+    "nombre": "Felipe",
+    "pais": "Brasil",
+    "notas": [
+      10,
+      31,
+      12
+    ]
+  }
+]
