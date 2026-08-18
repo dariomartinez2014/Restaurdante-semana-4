@@ -79,9 +79,7 @@ interface crearEstudiante {
   edad: number;
   notas?: number[];
 }
-/* 
-  nombre:"selec password from usuarios"
-*/
+
 app.post(
   "/estudiantes",
   function (req: Request<{}, {}, crearEstudiante>, res: Response) {
@@ -104,6 +102,53 @@ app.post(
     res.status(201).json(nuevoEstudiante);
   },
 );
+
+interface actualizarEstudiante {
+  nombre: string;
+  pais: string;
+  edad: number;
+  activo: boolean;
+  notas: number[];
+}
+app.put("/estudiantes/:id", function (req: Request, res: Response) {
+  const idBuscado = Number(req.params.id);
+  const index = listaEstudiantesFunvaleros.findIndex(function (e) {
+    return e.id === idBuscado;
+  });
+  if (index === -1) {
+    return res.status(404).json({ error: "estudiante no encontrado >:c" });
+  } else {
+    const { nombre, pais, edad, activo, notas }: actualizarEstudiante =
+      req.body;
+
+    listaEstudiantesFunvaleros[index] = {
+      id: idBuscado,
+      nombre: nombre ?? listaEstudiantesFunvaleros[index]?.nombre,
+      pais: pais ?? listaEstudiantesFunvaleros[index]?.pais,
+      edad: edad ?? listaEstudiantesFunvaleros[index]?.edad,
+      activo: activo ?? listaEstudiantesFunvaleros[index]?.activo,
+      notas: notas ?? listaEstudiantesFunvaleros[index]?.notas,
+    };
+    res.json(listaEstudiantesFunvaleros[index]);
+  }
+});
+// delete ELIMINACION DE UN REGISTRO :C
+app.delete("/estudiantes/:id", function (req: Request, res: Response) {
+  const idBuscado = Number(req.params.id);
+  const index = listaEstudiantesFunvaleros.findIndex(function (e) {
+    return e.id === idBuscado;
+  });
+  if (index === -1) {
+    return res
+      .status(404)
+      .json({ error: "estudiante no encontrado no podemos eliminarlo" });
+  } else {
+    listaEstudiantesFunvaleros = listaEstudiantesFunvaleros.filter(
+      (e) => e.id !== idBuscado,
+    );
+    res.json({ mensaje: "ESTUDIANTE ELIMINADO EXITOSAMENTE" });
+  }
+});
 
 // aplicacion escuchando el puerto 3000
 app.listen(PORT, async function () {
