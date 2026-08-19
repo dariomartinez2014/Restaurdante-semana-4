@@ -209,6 +209,37 @@ app.delete("/estudiantes/:id", function (req: Request, res: Response) {
   }
 });
 
+//rutas dinamicas anidadas
+interface notasParams {
+  id: string;
+  notaIndex: string;
+}
+app.get(
+  "/estudiantes/:id/notas/:notaIndex",
+  function (req: Request<notasParams>, res: Response) {
+    const idEstudiante = Number(req.params.id);
+    const index = Number(req.params.notaIndex);
+
+    const estudianteFunval = listaEstudiantesFunvaleros.find(
+      (e) => e.id === idEstudiante,
+    );
+
+    if (!estudianteFunval) {
+      return res.status(404).json({ error: "estudiante no encontrado" });
+    }
+
+    if (index < 0 || index >= estudianteFunval.notas.length) {
+      return res.status(400).json({ error: "nota no valida" });
+    }
+
+    return res.json({
+      estudiante: estudianteFunval.nombre,
+      notaIndice: index,
+      calificacion: estudianteFunval.notas[index],
+    });
+  },
+);
+
 // aplicacion escuchando el puerto 3000
 app.listen(PORT, async function () {
   await cargarDatos();
