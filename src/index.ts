@@ -55,21 +55,80 @@ app.get("/", async function (req: Request, res: Response) {
 });
 
 //endpoint para traer a todos los estudiantes
-app.get("/estudiantes", async function (req: Request, res: Response) {
-  res.json(listaEstudiantesFunvaleros);
-});
+interface estudiantesFiltrados {
+  nombre?: string;
+  pais?: string;
+  minEdad?: string;
+  activo?: string;
+}
+
+app.get(
+  "/estudiantes",
+  function (req: Request<{}, {}, {}, estudiantesFiltrados>, res: Response) {
+    const { activo, nombre, pais, minEdad } = req.query;
+    let resultado = [...listaEstudiantesFunvaleros];
+
+    //FILTRO PARA EL PAIS mayusculas y minusculas irrelevantes
+    if (pais) {
+      resultado = resultado.filter(
+        (e) => e.pais.toLowerCase() === pais.toLowerCase(),
+      );
+    }
+    //filtro POR EL NOMBRE indiferente a si esta minusculas o mayusculas
+    if (nombre) {
+      resultado = resultado.filter(
+        (e) => e.nombre.toLowerCase() === nombre.toLowerCase(),
+      );
+    }
+    //filtro por edad minima
+    if (minEdad) {
+      const edadNumerica = Number(minEdad);
+      if (!isNaN(edadNumerica)) {
+        resultado = resultado.filter((e) => e.edad >= edadNumerica);
+      } else {
+        return res.json({ error: "la edad minima debe ser un Numero" });
+      }
+    }
+    //filtro para el estado activo de mi estudiante
+    if (activo) {
+      if (activo.toLowerCase() === "true" || activo.toLowerCase() === "false") {
+        const esActivo = activo.toLowerCase() === "true";
+        resultado = resultado.filter((e) => e.activo === esActivo);
+      } else {
+        return res.json({ error: "el estado activo debe ser true o false" });
+      }
+    }
+
+    // mostrar el resultado filtrado
+    return res.json({
+      total: resultado.length,
+      datos: resultado,
+    });
+  },
+);
 
 //endpoint para traer a a un estudiante especifico x su id
-app.get("/estudiantes/:id", async function (req: Request, res: Response) {
-  let idBuscado = Number(req.params.id);
-  const encontrado = listaEstudiantesFunvaleros.filter(
+interface idParam {
+  id: string;
+}
+app.get("/estudiantes/:id", function (req: Request<idParam>, res: Response) {
+  const idBuscado = Number(req.params.id); //Number("juan") === 32
+
+  if (isNaN(idBuscado)) {
+    return res
+      .status(400)
+      .json({ error: "El parametro id debe ser un numero valido" });
+  }
+  const estudianteFiltrado = listaEstudiantesFunvaleros.find(
     (e) => e.id === idBuscado,
   );
-  if (encontrado.length > 0) {
-    res.json(encontrado);
-  } else {
-    return res.status(404).json({ error: "Estudiante no encontrado" });
+
+  if (!estudianteFiltrado) {
+    return res
+      .status(404)
+      .json({ error: "no existe un estudiante con ese ID" });
   }
+  return res.json(estudianteFiltrado);
 });
 
 //CREAR UN ESTUDIANTE NUEVO METODO POST
@@ -120,7 +179,7 @@ app.put("/estudiantes/:id", function (req: Request, res: Response) {
   } else {
     const { nombre, pais, edad, activo, notas }: actualizarEstudiante =
       req.body;
-
+    // actualizando la informacion del usuario
     listaEstudiantesFunvaleros[index] = {
       id: idBuscado,
       nombre: nombre ?? listaEstudiantesFunvaleros[index]?.nombre,
