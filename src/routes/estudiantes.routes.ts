@@ -20,7 +20,28 @@ const router = Router();
 router.get(
   "/",
   function (req: Request<{}, {}, {}, estudiantesFiltrados>, res: Response) {
-    // #swagger.description = 'Obtiene la lista de estudiantes'
+    // #swagger.description = 'Obtiene la lista de estudiantes con filtros opcionales'
+
+    /*  #swagger.parameters['pais'] = {
+            in: 'query',
+            description: 'Filtrar por país (insensible a mayúsculas)',
+            type: 'string'
+    } */
+    /*  #swagger.parameters['nombre'] = {
+            in: 'query',
+            description: 'Filtrar por nombre exacto',
+            type: 'string'
+    } */
+    /*  #swagger.parameters['minEdad'] = {
+            in: 'query',
+            description: 'Edad mínima requerida',
+            type: 'integer'
+    } */
+    /*  #swagger.parameters['activo'] = {
+            in: 'query',
+            description: 'Estado del estudiante (true o false)',
+            type: 'string'
+    } */
     const { activo, nombre, pais, minEdad } = req.query;
     let resultado = [...listaEstudiantesFunvaleros];
 

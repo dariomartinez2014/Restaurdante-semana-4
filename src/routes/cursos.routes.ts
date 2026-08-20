@@ -39,7 +39,10 @@ function setListaCursos(listanueva: curso[]) {
 }
 
 router.get("/", function (req: Request, res: Response) {
-  /* #swagger.tags = ['Cursos'] */
+  /*
+    #swagger.tags = ['Cursos']
+    #swagger.summary = 'ver todos los cursos'
+  */
   res.json(listaCursos);
 });
 

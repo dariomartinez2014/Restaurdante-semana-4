@@ -23,7 +23,33 @@
     },
     "/estudiante/": {
       "get": {
-        "description": "Obtiene la lista de estudiantes",
+        "description": "Obtiene la lista de estudiantes con filtros opcionales",
+        "parameters": [
+          {
+            "name": "pais",
+            "in": "query",
+            "description": "Filtrar por país (insensible a mayúsculas)",
+            "type": "string"
+          },
+          {
+            "name": "nombre",
+            "in": "query",
+            "description": "Filtrar por nombre exacto",
+            "type": "string"
+          },
+          {
+            "name": "minEdad",
+            "in": "query",
+            "description": "Edad mínima requerida",
+            "type": "integer"
+          },
+          {
+            "name": "activo",
+            "in": "query",
+            "description": "Estado del estudiante (true o false)",
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -144,6 +170,7 @@
         "tags": [
           "Cursos"
         ],
+        "summary": "ver todos los cursos",
         "description": "",
         "responses": {
           "200": {
