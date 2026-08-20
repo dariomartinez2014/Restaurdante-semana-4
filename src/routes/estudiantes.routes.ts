@@ -20,6 +20,7 @@ const router = Router();
 router.get(
   "/",
   function (req: Request<{}, {}, {}, estudiantesFiltrados>, res: Response) {
+    // #swagger.tags = ['Estudiantes']
     // #swagger.description = 'Obtiene la lista de estudiantes con filtros opcionales'
 
     /*  #swagger.parameters['pais'] = {
@@ -42,6 +43,7 @@ router.get(
             description: 'Estado del estudiante (true o false)',
             type: 'string'
     } */
+
     const { activo, nombre, pais, minEdad } = req.query;
     let resultado = [...listaEstudiantesFunvaleros];
 
@@ -85,7 +87,14 @@ router.get(
 //endpoint para traer a a un estudiante especifico x su id
 
 router.get("/:id", function (req: Request<idParam>, res: Response) {
+  // #swagger.tags = ['Estudiantes']
   // #swagger.description = 'Obtiene la informacion de un estudiante en especifico por su id'
+  /*  #swagger.parameters['id'] = {
+          in: 'path',
+          description: 'ID del estudiante a buscar',
+          required: true,
+          type: 'integer'
+  } */
   const idBuscado = Number(req.params.id); //Number("juan") === 32
 
   if (isNaN(idBuscado)) {
@@ -110,6 +119,21 @@ router.get("/:id", function (req: Request<idParam>, res: Response) {
 router.post(
   "/",
   function (req: Request<{}, {}, crearEstudiante>, res: Response) {
+    /*
+      #swagger.tags = ['Estudiantes']
+      #swagger.summary = 'crear un estudiante nuevo'
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Datos para crear un estudiante nuevo',
+        required: true,
+        schema: {
+          $nombre: "Juan Perez",
+          $pais: "Costa Rica",
+          $edad: 22,
+          notas: [90, 85]
+        }
+      }
+    */
     const { nombre, pais, edad, notas } = req.body;
     if (!nombre || !pais || !edad) {
       return res.status(400).json({ error: "faltan datos q son obligatorios" });
@@ -131,6 +155,28 @@ router.post(
 );
 
 router.put("/:id", function (req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Estudiantes']
+    #swagger.summary = 'actualizar un estudiante existente'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID del estudiante a actualizar',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.parameters['body'] = {
+      in: 'body',
+      description: 'Datos a actualizar del estudiante',
+      required: true,
+      schema: {
+        nombre: "Juan Perez",
+        pais: "Costa Rica",
+        edad: 22,
+        activo: true,
+        notas: [90, 85]
+      }
+    }
+  */
   const idBuscado = Number(req.params.id);
   const index = listaEstudiantesFunvaleros.findIndex(function (e) {
     return e.id === idBuscado;
@@ -154,6 +200,16 @@ router.put("/:id", function (req: Request, res: Response) {
 });
 // delete ELIMINACION DE UN REGISTRO :C
 router.delete("/:id", function (req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Estudiantes']
+    #swagger.summary = 'eliminar un estudiante'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID del estudiante a eliminar',
+      required: true,
+      type: 'integer'
+    }
+  */
   const idBuscado = Number(req.params.id);
   const index = listaEstudiantesFunvaleros.findIndex(function (e) {
     return e.id === idBuscado;
@@ -176,6 +232,22 @@ router.delete("/:id", function (req: Request, res: Response) {
 router.get(
   "/:id/notas/:notaIndex",
   function (req: Request<notasParams>, res: Response) {
+    /*
+      #swagger.tags = ['Estudiantes']
+      #swagger.summary = 'ver una nota especifica de un estudiante'
+      #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID del estudiante',
+        required: true,
+        type: 'integer'
+      }
+      #swagger.parameters['notaIndex'] = {
+        in: 'path',
+        description: 'Indice de la nota dentro del arreglo de notas',
+        required: true,
+        type: 'integer'
+      }
+    */
     const idEstudiante = Number(req.params.id);
     const index = Number(req.params.notaIndex);
 
@@ -188,7 +260,7 @@ router.get(
     }
 
     if (index < 0 || index >= estudianteFunval.notas.length) {
-      return res.status(400).json({ error: "nota no valida" });
+      return res.status(400).json({ error: "esa nota no existe" });
     }
 
     return res.json({

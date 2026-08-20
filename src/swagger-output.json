@@ -23,6 +23,9 @@
     },
     "/estudiante/": {
       "get": {
+        "tags": [
+          "Estudiantes"
+        ],
         "description": "Obtiene la lista de estudiantes con filtros opcionales",
         "parameters": [
           {
@@ -57,27 +60,48 @@
         }
       },
       "post": {
+        "tags": [
+          "Estudiantes"
+        ],
+        "summary": "crear un estudiante nuevo",
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para crear un estudiante nuevo",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "nombre": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Juan Perez"
                 },
                 "pais": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Costa Rica"
                 },
                 "edad": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 22
                 },
                 "notas": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [
+                    90,
+                    85
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
                 }
-              }
+              },
+              "required": [
+                "nombre",
+                "pais",
+                "edad"
+              ]
             }
           }
         ],
@@ -90,13 +114,17 @@
     },
     "/estudiante/{id}": {
       "get": {
+        "tags": [
+          "Estudiantes"
+        ],
         "description": "Obtiene la informacion de un estudiante en especifico por su id",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del estudiante a buscar"
           }
         ],
         "responses": {
@@ -106,13 +134,55 @@
         }
       },
       "put": {
+        "tags": [
+          "Estudiantes"
+        ],
+        "summary": "actualizar un estudiante existente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del estudiante a actualizar"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos a actualizar del estudiante",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Juan Perez"
+                },
+                "pais": {
+                  "type": "string",
+                  "example": "Costa Rica"
+                },
+                "edad": {
+                  "type": "number",
+                  "example": 22
+                },
+                "activo": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "notas": {
+                  "type": "array",
+                  "example": [
+                    90,
+                    85
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -125,13 +195,18 @@
         }
       },
       "delete": {
+        "tags": [
+          "Estudiantes"
+        ],
+        "summary": "eliminar un estudiante",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del estudiante a eliminar"
           }
         ],
         "responses": {
@@ -143,19 +218,25 @@
     },
     "/estudiante/{id}/notas/{notaIndex}": {
       "get": {
+        "tags": [
+          "Estudiantes"
+        ],
+        "summary": "ver una nota especifica de un estudiante",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del estudiante"
           },
           {
             "name": "notaIndex",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "Indice de la nota dentro del arreglo de notas"
           }
         ],
         "responses": {
@@ -174,7 +255,85 @@
         "description": "",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de cursos",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "number"
+                            },
+                            "example": {
+                              "type": "number",
+                              "example": 1
+                            }
+                          }
+                        },
+                        "titulo": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "programacion"
+                            }
+                          }
+                        },
+                        "duracionSemanas": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "number"
+                            },
+                            "example": {
+                              "type": "number",
+                              "example": 16
+                            }
+                          }
+                        },
+                        "publicado": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "boolean"
+                            },
+                            "example": {
+                              "type": "boolean",
+                              "example": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       },
@@ -188,16 +347,24 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para crear un curso nuevo",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "titulo": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Programacion web"
                 },
                 "duracionSemanas": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 16
                 }
-              }
+              },
+              "required": [
+                "titulo",
+                "duracionSemanas"
+              ]
             }
           }
         ],
@@ -213,28 +380,35 @@
         "tags": [
           "Cursos"
         ],
+        "summary": "actualizar un curso existente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del curso a actualizar"
           },
           {
             "name": "body",
             "in": "body",
+            "description": "Datos a actualizar del curso",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "titulo": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Programacion web"
                 },
                 "duracionSemanas": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 16
                 },
                 "publicado": {
-                  "example": "any"
+                  "type": "boolean",
+                  "example": true
                 }
               }
             }
@@ -250,13 +424,15 @@
         "tags": [
           "Cursos"
         ],
+        "summary": "eliminar un curso",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del curso a eliminar"
           }
         ],
         "responses": {
