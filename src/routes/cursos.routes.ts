@@ -39,10 +39,15 @@ function setListaCursos(listanueva: curso[]) {
 }
 
 router.get("/", function (req: Request, res: Response) {
+  /* #swagger.tags = ['Cursos'] */
   res.json(listaCursos);
 });
 
 router.post("/", function (req: Request<{}, {}, crearCurso>, res: Response) {
+  /*
+    #swagger.tags = ['Cursos']
+    #swagger.summary = 'crear un producto'
+  */
   const { titulo, duracionSemanas } = req.body;
   if (!titulo || !duracionSemanas) {
     return res.status(400).json({ error: "faltan datos q son obligatorios" });
@@ -57,27 +62,32 @@ router.post("/", function (req: Request<{}, {}, crearCurso>, res: Response) {
   res.status(201).json(nuevoCurso);
 });
 
-router.put("/:id", function (req: Request, res: Response) {
-  const idBuscado = Number(req.params.id);
-  const index = listaCursos.findIndex(function (e) {
-    return e.id === idBuscado;
-  });
-  if (index === -1) {
-    return res.status(404).json({ error: "curso no encontrado >:c" });
-  } else {
-    const { titulo, duracionSemanas, publicado }: actualizarCurso = req.body;
-    // actualizando la informacion del usuario
-    listaCursos[index] = {
-      id: idBuscado,
-      titulo: titulo ?? listaCursos[index]?.titulo,
-      duracionSemanas: duracionSemanas ?? listaCursos[index]?.duracionSemanas,
-      publicado: publicado ?? listaCursos[index]?.publicado,
-    };
-    res.json(listaCursos[index]);
-  }
-});
+router.put(
+  "/:id",
+  function (req: Request<{ id: string }, {}, actualizarCurso>, res: Response) {
+    /* #swagger.tags = ['Cursos'] */
+    const idBuscado = Number(req.params.id);
+    const index = listaCursos.findIndex(function (e) {
+      return e.id === idBuscado;
+    });
+    if (index === -1) {
+      return res.status(404).json({ error: "curso no encontrado >:c" });
+    } else {
+      const { titulo, duracionSemanas, publicado } = req.body;
+      // actualizando la informacion del usuario
+      listaCursos[index] = {
+        id: idBuscado,
+        titulo: titulo ?? listaCursos[index]?.titulo,
+        duracionSemanas: duracionSemanas ?? listaCursos[index]?.duracionSemanas,
+        publicado: publicado ?? listaCursos[index]?.publicado,
+      };
+      res.json(listaCursos[index]);
+    }
+  },
+);
 
 router.delete("/:id", function (req: Request, res: Response) {
+  /* #swagger.tags = ['Cursos'] */
   const idBuscado = Number(req.params.id);
   const index = listaCursos.findIndex(function (e) {
     return e.id === idBuscado;

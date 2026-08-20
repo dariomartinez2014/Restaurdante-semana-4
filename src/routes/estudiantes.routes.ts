@@ -20,6 +20,7 @@ const router = Router();
 router.get(
   "/",
   function (req: Request<{}, {}, {}, estudiantesFiltrados>, res: Response) {
+    // #swagger.description = 'Obtiene la lista de estudiantes'
     const { activo, nombre, pais, minEdad } = req.query;
     let resultado = [...listaEstudiantesFunvaleros];
 
@@ -38,20 +39,18 @@ router.get(
     //filtro por edad minima
     if (minEdad) {
       const edadNumerica = Number(minEdad);
-      if (!isNaN(edadNumerica)) {
-        resultado = resultado.filter((e) => e.edad >= edadNumerica);
-      } else {
+      if (isNaN(edadNumerica)) {
         return res.json({ error: "la edad minima debe ser un Numero" });
       }
+      resultado = resultado.filter((e) => e.edad >= edadNumerica);
     }
     //filtro para el estado activo de mi estudiante
     if (activo) {
-      if (activo.toLowerCase() === "true" || activo.toLowerCase() === "false") {
-        const esActivo = activo.toLowerCase() === "true";
-        resultado = resultado.filter((e) => e.activo === esActivo);
-      } else {
+      if (activo.toLowerCase() !== "true" && activo.toLowerCase() !== "false") {
         return res.json({ error: "el estado activo debe ser true o false" });
       }
+      const esActivo = activo.toLowerCase() === "true";
+      resultado = resultado.filter((e) => e.activo === esActivo);
     }
 
     // mostrar el resultado filtrado
@@ -65,6 +64,7 @@ router.get(
 //endpoint para traer a a un estudiante especifico x su id
 
 router.get("/:id", function (req: Request<idParam>, res: Response) {
+  // #swagger.description = 'Obtiene la informacion de un estudiante en especifico por su id'
   const idBuscado = Number(req.params.id); //Number("juan") === 32
 
   if (isNaN(idBuscado)) {
