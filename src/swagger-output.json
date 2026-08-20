@@ -1,0 +1,212 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API de gestion para un restaurante",
+    "description": "Documentacion generada automaticamente por swagger-autogen",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/repartidor/": {
+      "get": {
+        "tags": ["Repartidores"],
+        "description": "Obtiene la lista de repartidores con filtros",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "query",
+            "description": "Filtrar por nombre exacto",
+            "type": "string"
+          },
+          {
+            "name": "vehiculo",
+            "in": "query",
+            "description": "Filtrar por vehiculo (insensible a mayúsculas)",
+            "type": "string"
+          },
+          {
+            "name": "activo",
+            "in": "query",
+            "description": "Estado del repartidor (true o false)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": ["Repartidores"],
+        "summary": "crear un repartidor nuevo",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para crear un repartidor nuevo",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Marco rojas"
+                },
+                "vehiculo": {
+                  "type": "string",
+                  "example": "2507FRT"
+                },
+                "pedidosAsignados": {
+                  "type": "array",
+                  "example": [1, 3, 8],
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": ["nombre", "vehiculo"]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/repartidor/{id}": {
+      "get": {
+        "tags": ["Repartidores"],
+        "description": "Obtiene la informacion de un repartidor en especifico por su id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID del repartidor a buscar"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "tags": ["Repartidores"],
+        "summary": "actualizar un repartidor existente",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID del repartidor a actualizar"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos a actualizar del repartidor",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Marco Nuñez"
+                },
+                "vehiculo": {
+                  "type": "string",
+                  "example": "4065GED"
+                },
+                "activo": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "pedidosAsignados": {
+                  "type": "array",
+                  "example": [1, 2, 20, 10],
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Repartidores"],
+        "summary": "eliminar un repartidor",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID del repartidor a eliminar"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/repartidor/{id}/pedidosAsignados/{pedidoAsignadoIndex}": {
+      "get": {
+        "tags": ["Repartidores"],
+        "summary": "ver un pedido especifico de un repartidor",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID del repartidor"
+          },
+          {
+            "name": "pedidoAsignadoIndex",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "Indice del id del pedido dentro del arreglo de pedidos asignados"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}
