@@ -13,8 +13,14 @@ interface CrearProductoBody {
   precio: number;
   disponible: boolean;
 }
+interface ActualizarProducto {
+  nombre: string;
+  categoria: string;
+  precio: number;
+  disponible: boolean;
+}
 
-export type ActualizarProducto = Partial<CrearProductoBody>;
+//export type ActualizarProducto = Partial<CrearProductoBody>;
 
 // Tipo para la actualización (todos los campos opcionales)
-export type { Producto, CrearProductoBody };
+export type { Producto, CrearProductoBody, ActualizarProducto };

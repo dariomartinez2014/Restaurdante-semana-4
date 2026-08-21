@@ -69,7 +69,7 @@ router.get("/:id", (req: Request, res: Response) => {
 // 3. POST /productos (Agregar nuevo producto)
 router.post("/", (req: Request<{}, {}, CrearProductoBody>, res: Response) => {
   /* 
-      #swagger.tags = ['Productos']
+      #swagger.tags = ['Producto']
       #swagger.summary = 'Agregar nuevo producto al menú'
       #swagger.requestBody = {
         required: true,
@@ -112,23 +112,25 @@ router.post("/", (req: Request<{}, {}, CrearProductoBody>, res: Response) => {
   }
 
   const nuevoProducto: Producto = {
-    id: productos.length > 0 ? Math.max(...productos.map((p) => p.id)) + 1 : 1,
+    id:
+      listaProductos.length > 0
+        ? Math.max(...listaProductos.map((p) => p.id)) + 1
+        : 1,
     nombre: String(nombre).trim(),
     categoria: String(categoria).trim(),
     precio,
     disponible: Boolean(disponible),
   };
 
-  productos.push(nuevoProducto);
+  listaProductos.push(nuevoProducto);
   return res.status(201).json(nuevoProducto);
 });
 
-// 4. PUT /productos/:id (Modificar producto existente)
 router.put(
   "/:id",
   (req: Request<{ id: string }, {}, ActualizarProducto>, res: Response) => {
     /* 
-      #swagger.tags = ['Productos']
+      #swagger.tags = ['Producto']
       #swagger.summary = 'Modificar producto existente'
       #swagger.parameters['id'] = {
         in: 'path',
@@ -157,7 +159,7 @@ router.put(
       #swagger.responses[404] = { description: 'Producto no encontrado' }
     */
     const idBuscado = Number(req.params.id);
-    const index = productos.findIndex((p) => p.id === idBuscado);
+    const index = listaProductos.findIndex((p) => p.id === idBuscado);
 
     if (index === -1) {
       return res.status(404).json({ error: "Producto no encontrado" });
@@ -170,14 +172,14 @@ router.put(
         });
       }
     }
-
-    productos[index] = {
-      ...productos[index],
+    const productoActualizado: Producto = {
+      ...listaProductos[index],
       ...req.body,
       id: idBuscado,
     };
+    listaProductos[index] = productoActualizado;
 
-    return res.json(productos[index]);
+    return res.json(listaProductos[index]);
   },
 );
 
@@ -196,13 +198,13 @@ router.delete("/:id", (req: Request, res: Response) => {
     #swagger.responses[404] = { description: 'Producto no encontrado' }
   */
   const idBuscado = Number(req.params.id);
-  const index = productos.findIndex((p) => p.id === idBuscado);
+  const index = listaProductos.findIndex((p) => p.id === idBuscado);
 
   if (index === -1) {
     return res.status(404).json({ error: "Producto no encontrado" });
   }
 
-  const [eliminado] = productos.splice(index, 1);
+  const [eliminado] = listaProductos.splice(index, 1);
   return res.json({ mensaje: "Producto eliminado", producto: eliminado });
 });
 
