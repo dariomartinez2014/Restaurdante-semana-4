@@ -184,107 +184,122 @@
     },
     "/clientes/": {
       "get": {
-        "description": "",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Obtiene la lista de clientes con filtros",
         "parameters": [
           {
             "name": "ciudad",
             "in": "query",
+            "description": "coloca la cuidad del cliente",
             "type": "string"
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
+          "default": {
+            "description": ""
           }
         }
       },
       "post": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "crear un cliente nuevo",
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para crear un cliente nuevo",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "nombre": {
-                  "example": "any"
-                },
-                "apellidos": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Marco"
                 },
                 "telefono": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "75060047"
                 },
                 "direccion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "calle tamu"
                 },
                 "ciudad": {
-                  "example": "any"
-                },
-                "email": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "buenos aires"
                 }
-              }
+              },
+              "required": [
+                "nombre",
+                "telefono",
+                "direccion",
+                "ciudad"
+              ]
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
+          "default": {
+            "description": ""
           }
         }
       }
     },
     "/clientes/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Obtiene la informacion de un Cliente en especifico por su id",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del cliente a buscar"
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
+          "default": {
+            "description": ""
           }
         }
       },
       "put": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "actualizar un cliente existente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "ID del cliente a actualizar"
           },
           {
             "name": "body",
             "in": "body",
+            "description": "Datos a actualizar del cliente",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "telefono": {
-                  "example": "any"
-                },
                 "direccion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "av. padilla"
+                },
+                "telefono": {
+                  "type": "string",
+                  "example": "60949745"
                 }
               }
             }
@@ -293,9 +308,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "404": {
             "description": "Not Found"
@@ -303,24 +315,203 @@
         }
       },
       "delete": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "eliminar un cliente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "integer",
+            "description": "ID del cliente a eliminar"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/productos/": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Obtener catálogo de productos",
+        "description": "Devuelve todos los productos o permite filtrarlos opcionalmente por categoría",
+        "parameters": [
+          {
+            "name": "categoria",
+            "in": "query",
+            "description": "Filtrar por categoría (ej: comida, bebida)",
+            "required": false,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista de productos enviada exitosamente"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Agregar nuevo producto al menú",
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Producto agregado al menú"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Datos inválidos o precio menor o igual a 0"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nombre",
+                  "categoria",
+                  "precio",
+                  "disponible"
+                ],
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "example": "Pizza Pepperoni"
+                  },
+                  "categoria": {
+                    "type": "string",
+                    "example": "comida"
+                  },
+                  "precio": {
+                    "type": "number",
+                    "example": 50
+                  },
+                  "disponible": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/productos/{id}": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Obtener producto por ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "description": "ID del producto"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto encontrado"
+          },
+          "400": {
+            "description": "ID inválido"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Producto no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Modificar producto existente",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "description": "ID del producto a modificar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto actualizado"
+          },
+          "400": {
+            "description": "Precio inválido"
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "example": "Hamburguesa Doble"
+                  },
+                  "categoria": {
+                    "type": "string",
+                    "example": "comida"
+                  },
+                  "precio": {
+                    "type": "number",
+                    "example": 30
+                  },
+                  "disponible": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Eliminar producto del catálogo",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "description": "ID del producto a eliminar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto eliminado correctamente"
+          },
+          "404": {
+            "description": "Producto no encontrado"
           }
         }
       }

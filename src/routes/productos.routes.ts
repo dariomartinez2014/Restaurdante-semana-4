@@ -39,7 +39,7 @@ router.get("/", (req: Request, res: Response) => {
 // 2. GET /listaProductos/:id (Detalles de un producto)
 router.get("/:id", (req: Request, res: Response) => {
   /* 
-    #swagger.tags = ['Producto']
+    #swagger.tags = ['Productos']
     #swagger.summary = 'Obtener producto por ID'
     #swagger.parameters['id'] = {
       in: 'path',
@@ -69,7 +69,7 @@ router.get("/:id", (req: Request, res: Response) => {
 // 3. POST /productos (Agregar nuevo producto)
 router.post("/", (req: Request<{}, {}, CrearProductoBody>, res: Response) => {
   /* 
-      #swagger.tags = ['Producto']
+      #swagger.tags = ['Productos']
       #swagger.summary = 'Agregar nuevo producto al menú'
       #swagger.requestBody = {
         required: true,
@@ -130,7 +130,7 @@ router.put(
   "/:id",
   (req: Request<{ id: string }, {}, ActualizarProducto>, res: Response) => {
     /* 
-      #swagger.tags = ['Producto']
+      #swagger.tags = ['Productos']
       #swagger.summary = 'Modificar producto existente'
       #swagger.parameters['id'] = {
         in: 'path',
