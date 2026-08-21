@@ -553,17 +553,82 @@
             "schema": {
               "type": "object",
               "properties": {
-                "clienteId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "detalles": {
+                "type": {
                   "type": "string",
-                  "example": "2 hamburguesas y una gaseosa"
+                  "example": "object"
                 },
-                "total": {
-                  "type": "number",
-                  "example": 80
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "clienteId": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "integer"
+                        },
+                        "enum": {
+                          "type": "array",
+                          "example": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10
+                          ],
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "ID del cliente"
+                        }
+                      }
+                    },
+                    "detalles": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "2 hamburguesas y 1 gaseosa"
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "number"
+                        },
+                        "example": {
+                          "type": "number",
+                          "example": 80
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": {
+                  "type": "array",
+                  "example": [
+                    "clienteId",
+                    "detalles",
+                    "total"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
