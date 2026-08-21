@@ -1,0 +1,209 @@
+import { Router } from "express";
+import type { Request, Response } from "express";
+import { listaProductos } from "../data/productos.data.js";
+import type {
+  Producto,
+  CrearProductoBody,
+  ActualizarProducto,
+} from "../types/productos.types.js";
+
+const router = Router();
+
+// 1. GET /productos (Listar todos / filtrar por categoría)
+router.get("/", (req: Request, res: Response) => {
+  /* 
+    #swagger.tags = ['Productos']
+    #swagger.summary = 'Obtener catálogo de productos'
+    #swagger.description = 'Devuelve todos los productos o permite filtrarlos opcionalmente por categoría'
+    #swagger.parameters['categoria'] = {
+      in: 'query',
+      description: 'Filtrar por categoría (ej: comida, bebida)',
+      required: false,
+      type: 'string'
+    }
+    #swagger.responses[200] = { description: 'Lista de productos enviada exitosamente' }
+  */
+  const { categoria } = req.query;
+
+  if (categoria) {
+    const categoriaStr = String(categoria).toLowerCase();
+    const filtrados = listaProductos.filter(
+      (p) => p.categoria.toLowerCase() === categoriaStr,
+    );
+    return res.json(filtrados);
+  }
+
+  return res.json(listaProductos);
+});
+
+// 2. GET /listaProductos/:id (Detalles de un producto)
+router.get("/:id", (req: Request, res: Response) => {
+  /* 
+    #swagger.tags = ['Producto']
+    #swagger.summary = 'Obtener producto por ID'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID del producto',
+      required: true,
+      type: 'number'
+    }
+    #swagger.responses[200] = { description: 'Producto encontrado' }
+    #swagger.responses[400] = { description: 'ID inválido' }
+    #swagger.responses[404] = { description: 'Producto no encontrado' }
+  */
+  const idBuscado = Number(req.params.id);
+
+  if (isNaN(idBuscado)) {
+    return res.status(400).json({ error: "El ID debe ser un número válido" });
+  }
+
+  const producto = listaProductos.find((p) => p.id === idBuscado);
+
+  if (!producto) {
+    return res.status(404).json({ error: "Producto no encontrado" });
+  }
+
+  return res.json(producto);
+});
+
+// 3. POST /productos (Agregar nuevo producto)
+router.post("/", (req: Request<{}, {}, CrearProductoBody>, res: Response) => {
+  /* 
+      #swagger.tags = ['Productos']
+      #swagger.summary = 'Agregar nuevo producto al menú'
+      #swagger.requestBody = {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['nombre', 'categoria', 'precio', 'disponible'],
+              properties: {
+                nombre: { type: 'string', example: 'Pizza Pepperoni' },
+                categoria: { type: 'string', example: 'comida' },
+                precio: { type: 'number', example: 50 },
+                disponible: { type: 'boolean', example: true }
+              }
+            }
+          }
+        }
+      }
+      #swagger.responses[201] = { description: 'Producto agregado al menú' }
+      #swagger.responses[400] = { description: 'Datos inválidos o precio menor o igual a 0' }
+    */
+  const { nombre, categoria, precio, disponible } = req.body;
+
+  if (
+    !nombre ||
+    !categoria ||
+    precio === undefined ||
+    disponible === undefined
+  ) {
+    return res.status(400).json({
+      error:
+        "Los campos nombre, categoria, precio y disponible son obligatorios",
+    });
+  }
+
+  if (typeof precio !== "number" || precio <= 0) {
+    return res.status(400).json({
+      error: "El precio debe ser un número estrictamente mayor a 0",
+    });
+  }
+
+  const nuevoProducto: Producto = {
+    id: productos.length > 0 ? Math.max(...productos.map((p) => p.id)) + 1 : 1,
+    nombre: String(nombre).trim(),
+    categoria: String(categoria).trim(),
+    precio,
+    disponible: Boolean(disponible),
+  };
+
+  productos.push(nuevoProducto);
+  return res.status(201).json(nuevoProducto);
+});
+
+// 4. PUT /productos/:id (Modificar producto existente)
+router.put(
+  "/:id",
+  (req: Request<{ id: string }, {}, ActualizarProducto>, res: Response) => {
+    /* 
+      #swagger.tags = ['Productos']
+      #swagger.summary = 'Modificar producto existente'
+      #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID del producto a modificar',
+        required: true,
+        type: 'number'
+      }
+      #swagger.requestBody = {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                nombre: { type: 'string', example: 'Hamburguesa Doble' },
+                categoria: { type: 'string', example: 'comida' },
+                precio: { type: 'number', example: 30 },
+                disponible: { type: 'boolean', example: false }
+              }
+            }
+          }
+        }
+      }
+      #swagger.responses[200] = { description: 'Producto actualizado' }
+      #swagger.responses[400] = { description: 'Precio inválido' }
+      #swagger.responses[404] = { description: 'Producto no encontrado' }
+    */
+    const idBuscado = Number(req.params.id);
+    const index = productos.findIndex((p) => p.id === idBuscado);
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    if (req.body.precio !== undefined) {
+      if (typeof req.body.precio !== "number" || req.body.precio <= 0) {
+        return res.status(400).json({
+          error: "El precio debe ser un número mayor a 0",
+        });
+      }
+    }
+
+    productos[index] = {
+      ...productos[index],
+      ...req.body,
+      id: idBuscado,
+    };
+
+    return res.json(productos[index]);
+  },
+);
+
+// 5. DELETE /productos/:id (Eliminar producto)
+router.delete("/:id", (req: Request, res: Response) => {
+  /* 
+    #swagger.tags = ['Productos']
+    #swagger.summary = 'Eliminar producto del catálogo'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID del producto a eliminar',
+      required: true,
+      type: 'number'
+    }
+    #swagger.responses[200] = { description: 'Producto eliminado correctamente' }
+    #swagger.responses[404] = { description: 'Producto no encontrado' }
+  */
+  const idBuscado = Number(req.params.id);
+  const index = productos.findIndex((p) => p.id === idBuscado);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Producto no encontrado" });
+  }
+
+  const [eliminado] = productos.splice(index, 1);
+  return res.json({ mensaje: "Producto eliminado", producto: eliminado });
+});
+
+export default router;
