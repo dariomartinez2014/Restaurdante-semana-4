@@ -362,48 +362,49 @@
         "tags": [
           "Productos"
         ],
-        "summary": "Agregar nuevo producto al menú",
+        "summary": "Modificar producto existente",
         "description": "",
-        "responses": {
-          "201": {
-            "description": "Producto agregado al menú"
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto a modificar",
+            "required": true,
+            "type": "number"
           },
-          "400": {
-            "description": "Datos inválidos o precio menor o igual a 0"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "nombre",
-                  "categoria",
-                  "precio",
-                  "disponible"
-                ],
-                "properties": {
-                  "nombre": {
-                    "type": "string",
-                    "example": "Pizza Pepperoni"
-                  },
-                  "categoria": {
-                    "type": "string",
-                    "example": "comida"
-                  },
-                  "precio": {
-                    "type": "number",
-                    "example": 50
-                  },
-                  "disponible": {
-                    "type": "boolean",
-                    "example": true
-                  }
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos a actualizar del producto",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "nombre"
+                },
+                "categoria": {
+                  "type": "string",
+                  "example": "comida, bebida, etc."
+                },
+                "precio": {
+                  "type": "number",
+                  "example": 50
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto actualizado"
+          },
+          "400": {
+            "description": "Precio inválido"
+          },
+          "404": {
+            "description": "Producto no encontrado"
           }
         }
       }
@@ -542,93 +543,32 @@
         "tags": [
           "Pedidos"
         ],
-        "summary": "Crear un nuevo pedido",
+        "summary": "Crear una nueva orden de pedido",
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "description": "Datos necesarios para crear un pedido",
+            "description": "Datos para crear una nueva orden de pedido",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "type": {
+                "clienteId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "detalles": {
                   "type": "string",
-                  "example": "object"
+                  "example": "2 hamburguesas y 1 gaseosa"
                 },
-                "properties": {
-                  "type": "object",
-                  "properties": {
-                    "clienteId": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "integer"
-                        },
-                        "enum": {
-                          "type": "array",
-                          "example": [
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6,
-                            7,
-                            8,
-                            9,
-                            10
-                          ],
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "description": {
-                          "type": "string",
-                          "example": "ID del cliente"
-                        }
-                      }
-                    },
-                    "detalles": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        },
-                        "example": {
-                          "type": "string",
-                          "example": "2 hamburguesas y 1 gaseosa"
-                        }
-                      }
-                    },
-                    "total": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "number"
-                        },
-                        "example": {
-                          "type": "number",
-                          "example": 80
-                        }
-                      }
-                    }
-                  }
+                "total": {
+                  "type": "number",
+                  "example": 80
                 },
-                "required": {
-                  "type": "array",
-                  "example": [
-                    "clienteId",
-                    "detalles",
-                    "total"
-                  ],
-                  "items": {
-                    "type": "string"
-                  }
+                "estado": {
+                  "type": "boolean",
+                  "example": false
                 }
               }
             }

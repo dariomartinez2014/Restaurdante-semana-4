@@ -68,28 +68,28 @@ router.get("/:id", (req: Request, res: Response) => {
 
 // 3. POST /productos (Agregar nuevo producto)
 router.post("/", (req: Request<{}, {}, CrearProductoBody>, res: Response) => {
-  /* 
+  /*
       #swagger.tags = ['Productos']
-      #swagger.summary = 'Agregar nuevo producto al menú'
-      #swagger.requestBody = {
+      #swagger.summary = 'Modificar producto existente'
+      #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID del producto a modificar',
         required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['nombre', 'categoria', 'precio', 'disponible'],
-              properties: {
-                nombre: { type: 'string', example: 'Pizza Pepperoni' },
-                categoria: { type: 'string', example: 'comida' },
-                precio: { type: 'number', example: 50 },
-                disponible: { type: 'boolean', example: true }
-              }
-            }
-          }
-        }
+        type: 'number'
       }
-      #swagger.responses[201] = { description: 'Producto agregado al menú' }
-      #swagger.responses[400] = { description: 'Datos inválidos o precio menor o igual a 0' }
+      #swagger.parameters['body'] = {
+      in: 'body',
+      description: 'Datos a actualizar del producto',
+      required: true,
+        schema: {
+          nombre: 'nombre',
+          categoria: 'comida, bebida, etc.',
+          precio: 50
+        }
+      }    
+      #swagger.responses[200] = { description: 'Producto actualizado' }
+      #swagger.responses[400] = { description: 'Precio inválido' }
+      #swagger.responses[404] = { description: 'Producto no encontrado' }
     */
   const { nombre, categoria, precio, disponible } = req.body;
 

@@ -88,34 +88,21 @@ router.get("/:id", function (req: Request<idParams>, res: Response) {
 // Crear un pedido
 router.post("/", function (req: Request<{}, {}, crearPedido>, res: Response) {
   /*
-  #swagger.tags = ['Pedidos']
-  #swagger.summary = 'Crear un nuevo pedido'
+      #swagger.tags = ['Pedidos']
+      #swagger.summary = 'Crear una nueva orden de pedido'
 
-  #swagger.parameters['body'] = {
-    in: 'body',
-    description: 'Datos necesarios para crear un pedido',
-    required: true,
-    schema: {
-      type: 'object',
-      properties: {
-        clienteId: {
-          type: 'integer',
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-          description: 'ID del cliente'
-        },
-        detalles: {
-          type: 'string',
-          example: '2 hamburguesas y 1 gaseosa'
-        },
-        total: {
-          type: 'number',
-          example: 80
+      #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'Datos para crear una nueva orden de pedido',
+        required: true,
+        schema: {
+          clienteId: 1,
+          detalles: "2 hamburguesas y 1 gaseosa",
+          total: 80,
+          estado: false
         }
-      },
-      required: ['clienteId', 'detalles', 'total']
-    }
-  }
-*/
+      }
+    */
 
   const { clienteId, detalles, total } = req.body;
 
@@ -154,11 +141,7 @@ router.post("/", function (req: Request<{}, {}, crearPedido>, res: Response) {
   };
 
   listaPedidos.push(nuevoPedido);
-
-  return res.status(201).json({
-    mensaje: "Pedido creado exitosamente",
-    pedido: nuevoPedido,
-  });
+  return res.status(201).json(nuevoPedido);
 });
 
 // PUT /pedidos/:id
