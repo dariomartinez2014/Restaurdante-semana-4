@@ -2,6 +2,8 @@ import express from "express";
 import type { Request, Response } from "express";
 import repartidoresRouter from "./routes/repartidores.routes.js";
 import clientesRouter from "./routes/clientes.routes.js";
+
+import productosRouter from "./routes/productos.routes.js";
 import swaggerUi from "swagger-ui-express";
 import fs from "node:fs";
 import path from "node:path";
@@ -24,6 +26,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/repartidor", repartidoresRouter);
 app.use("/clientes", clientesRouter);
+app.use("/productos", productosRouter);
 
 // aplicacion escuchando el puerto 3000
 app.listen(PORT, async () => {
