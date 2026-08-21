@@ -16,7 +16,7 @@ import type {
 const router = Router();
 
 //endpoints
-
+//repartidor filtrado por estado
 router.get(
   "/",
   function (req: Request<{}, {}, {}, repartidoresFiltrados>, res: Response) {

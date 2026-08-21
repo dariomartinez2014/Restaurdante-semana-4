@@ -1,11 +1,35 @@
 interface Cliente {
   id: number;
   nombre: string;
-  apellidos?: string; //es opcional
-  telefono: number;
+  apellidos?: string | undefined; //es opcional
+  telefono: string;
   direccion: string;
   ciudad: string; //pide filtrar por ciudad
-  email?: string; //es opcional
+  email?: string | undefined; //es opcional
 }
 
-export type { Cliente };
+interface crearCliente {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  ciudad: string;
+}
+interface actualizarCliente {
+  direccion: string;
+  telefono: string;
+}
+interface clientesFiltrados {
+  cuidad?: string;
+}
+
+interface idParams {
+  id: string;
+}
+
+export type {
+  Cliente,
+  crearCliente,
+  actualizarCliente,
+  clientesFiltrados,
+  idParams,
+};
