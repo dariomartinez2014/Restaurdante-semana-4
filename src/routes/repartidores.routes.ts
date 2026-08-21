@@ -22,38 +22,14 @@ router.get(
   function (req: Request<{}, {}, {}, repartidoresFiltrados>, res: Response) {
     // #swagger.tags = ['Repartidores']
     // #swagger.description = 'Obtiene la lista de repartidores con filtros'
-
-    /*  #swagger.parameters['vehiculo'] = {
-            in: 'query',
-            description: 'Filtrar por vehiculo (insensible a mayúsculas)',
-            type: 'string'
-    } */
-    /*  #swagger.parameters['nombre'] = {
-            in: 'query',
-            description: 'Filtrar por nombre exacto',
-            type: 'string'
-    } */
     /*  #swagger.parameters['activo'] = {
             in: 'query',
             description: 'Estado del repartidor (true o false)',
             type: 'string'
     } */
 
-    const { activo, nombre, vehiculo } = req.query;
+    const activo = req.query.activo;
     let resultado = [...listaRepartidores];
-
-    //FILTRO PARA EL VEHICULO mayusculas y minusculas irrelevantes
-    if (vehiculo) {
-      resultado = resultado.filter(
-        (e) => e.vehiculo.toLowerCase() === vehiculo.toLowerCase(),
-      );
-    }
-    //filtro POR EL NOMBRE indiferente a si esta minusculas o mayusculas
-    if (nombre) {
-      resultado = resultado.filter(
-        (e) => e.nombre.toLowerCase() === nombre.toLowerCase(),
-      );
-    }
 
     //filtro para el estado activo del repartidor
     if (activo) {
@@ -113,24 +89,31 @@ router.post(
         description: 'Datos para crear un repartidor nuevo',
         required: true,
         schema: {
-          $nombre: "Marco rojas",
+          $nombre: "Marco",
           $vehiculo: "2507FRT",
-          pedidosAsignados: [1,3,8]
+          $telefono: "75060047",
+          $activo: true
         }
       }
     */
-    const { nombre, vehiculo, pedidosAsignados } = req.body;
-    if (!nombre || !vehiculo || !pedidosAsignados) {
+    const { nombre, vehiculo, telefono, activo } = req.body;
+    if (!nombre || !vehiculo || !telefono || activo === undefined) {
       return res
         .status(400)
         .json({ error: "faltan datos que son obligatorios" });
+    }
+    if (activo !== true && activo !== false) {
+      return res.status(400).json({
+        error: "El campo activo solamente puede ser true o false",
+      });
     }
     const nuevoRepartidor: repartidores = {
       id: listaRepartidores.length > 0 ? listaRepartidores.length + 1 : 1,
       nombre,
       vehiculo,
-      activo: true,
-      pedidosAsignados: pedidosAsignados ?? [],
+      telefono,
+      activo,
+      pedidosAsignados: [],
     };
     listaRepartidores.push(nuevoRepartidor);
     res.status(201).json(nuevoRepartidor);
@@ -152,10 +135,9 @@ router.put("/:id", function (req: Request, res: Response) {
       description: 'Datos a actualizar del repartidor',
       required: true,
       schema: {
-        nombre: "Marco Nuñez",
         vehiculo: "4065GED",
-        activo: true,
-        pedidosAsignados: [1, 2, 20, 10]
+        telefono: "60949745",
+        activo: true
       }
     }
   */
@@ -166,16 +148,23 @@ router.put("/:id", function (req: Request, res: Response) {
   if (index === -1) {
     return res.status(404).json({ error: "Repartidor no encontrado" });
   } else {
-    const { nombre, vehiculo, activo, pedidosAsignados }: actualizarRepartidor =
-      req.body;
+    const repartidor = listaRepartidores[index]!;
+    const { vehiculo, activo, telefono }: actualizarRepartidor = req.body;
+
+    // Validando que activo solamente sea true o false
+    if (activo !== undefined && activo !== true && activo !== false) {
+      return res.status(400).json({
+        error: "El campo activo solamente puede ser true o false",
+      });
+    }
     // actualizando la informacion del usuario
     listaRepartidores[index] = {
       id: idBuscado,
-      nombre: nombre ?? listaRepartidores[index]?.nombre,
+      nombre: repartidor.nombre,
       vehiculo: vehiculo ?? listaRepartidores[index]?.vehiculo,
       activo: activo ?? listaRepartidores[index]?.activo,
-      pedidosAsignados:
-        pedidosAsignados ?? listaRepartidores[index]?.pedidosAsignados,
+      pedidosAsignados: repartidor.pedidosAsignados,
+      telefono: telefono ?? listaRepartidores[index]?.telefono,
     };
     res.json(listaRepartidores[index]);
   }
@@ -206,47 +195,5 @@ router.delete("/:id", function (req: Request, res: Response) {
     res.json({ mensaje: "REPARTIDOR ELIMINADO EXITOSAMENTE" });
   }
 });
-
-//rutas dinamicas anidadas
-
-router.get(
-  "/:id/pedidosAsignados/:pedidoAsignadoIndex",
-  function (req: Request<pedidosParams>, res: Response) {
-    /*
-      #swagger.tags = ['Repartidores']
-      #swagger.summary = 'ver un pedido especifico de un repartidor'
-      #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID del repartidor',
-        required: true,
-        type: 'integer'
-      }
-      #swagger.parameters['pedidoAsignadoIndex'] = {
-        in: 'path',
-        description: 'Indice del id del pedido dentro del arreglo de pedidos asignados',
-        required: true,
-        type: 'integer'
-      }
-    */
-    const idRepartidor = Number(req.params.id);
-    const index = Number(req.params.pedidoAsignadoIndex);
-
-    const repartidor = listaRepartidores.find((e) => e.id === idRepartidor);
-
-    if (!repartidor) {
-      return res.status(404).json({ error: "Repartidor no encontrado" });
-    }
-
-    if (index < 0 || index >= repartidor.pedidosAsignados.length) {
-      return res.status(400).json({ error: "ese pedido no existe" });
-    }
-
-    return res.json({
-      repartidor: repartidor.nombre,
-      pedidoAsignadoIndice: index,
-      idPedido: repartidor.pedidosAsignados[index],
-    });
-  },
-);
 
 export default router;

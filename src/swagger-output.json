@@ -7,7 +7,9 @@
   },
   "host": "localhost:3000",
   "basePath": "/",
-  "schemes": ["http"],
+  "schemes": [
+    "http"
+  ],
   "paths": {
     "/": {
       "get": {
@@ -21,21 +23,11 @@
     },
     "/repartidor/": {
       "get": {
-        "tags": ["Repartidores"],
+        "tags": [
+          "Repartidores"
+        ],
         "description": "Obtiene la lista de repartidores con filtros",
         "parameters": [
-          {
-            "name": "nombre",
-            "in": "query",
-            "description": "Filtrar por nombre exacto",
-            "type": "string"
-          },
-          {
-            "name": "vehiculo",
-            "in": "query",
-            "description": "Filtrar por vehiculo (insensible a mayúsculas)",
-            "type": "string"
-          },
           {
             "name": "activo",
             "in": "query",
@@ -50,7 +42,9 @@
         }
       },
       "post": {
-        "tags": ["Repartidores"],
+        "tags": [
+          "Repartidores"
+        ],
         "summary": "crear un repartidor nuevo",
         "description": "",
         "parameters": [
@@ -64,21 +58,27 @@
               "properties": {
                 "nombre": {
                   "type": "string",
-                  "example": "Marco rojas"
+                  "example": "Marco"
                 },
                 "vehiculo": {
                   "type": "string",
                   "example": "2507FRT"
                 },
-                "pedidosAsignados": {
-                  "type": "array",
-                  "example": [1, 3, 8],
-                  "items": {
-                    "type": "number"
-                  }
+                "telefono": {
+                  "type": "string",
+                  "example": "75060047"
+                },
+                "activo": {
+                  "type": "boolean",
+                  "example": true
                 }
               },
-              "required": ["nombre", "vehiculo"]
+              "required": [
+                "nombre",
+                "vehiculo",
+                "telefono",
+                "activo"
+              ]
             }
           }
         ],
@@ -91,7 +91,9 @@
     },
     "/repartidor/{id}": {
       "get": {
-        "tags": ["Repartidores"],
+        "tags": [
+          "Repartidores"
+        ],
         "description": "Obtiene la informacion de un repartidor en especifico por su id",
         "parameters": [
           {
@@ -109,7 +111,9 @@
         }
       },
       "put": {
-        "tags": ["Repartidores"],
+        "tags": [
+          "Repartidores"
+        ],
         "summary": "actualizar un repartidor existente",
         "description": "",
         "parameters": [
@@ -128,24 +132,17 @@
             "schema": {
               "type": "object",
               "properties": {
-                "nombre": {
-                  "type": "string",
-                  "example": "Marco Nuñez"
-                },
                 "vehiculo": {
                   "type": "string",
                   "example": "4065GED"
                 },
+                "telefono": {
+                  "type": "string",
+                  "example": "60949745"
+                },
                 "activo": {
                   "type": "boolean",
                   "example": true
-                },
-                "pedidosAsignados": {
-                  "type": "array",
-                  "example": [1, 2, 20, 10],
-                  "items": {
-                    "type": "number"
-                  }
                 }
               }
             }
@@ -155,13 +152,18 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "404": {
             "description": "Not Found"
           }
         }
       },
       "delete": {
-        "tags": ["Repartidores"],
+        "tags": [
+          "Repartidores"
+        ],
         "summary": "eliminar un repartidor",
         "description": "",
         "parameters": [
@@ -171,34 +173,6 @@
             "required": true,
             "type": "integer",
             "description": "ID del repartidor a eliminar"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/repartidor/{id}/pedidosAsignados/{pedidoAsignadoIndex}": {
-      "get": {
-        "tags": ["Repartidores"],
-        "summary": "ver un pedido especifico de un repartidor",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "description": "ID del repartidor"
-          },
-          {
-            "name": "pedidoAsignadoIndex",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "description": "Indice del id del pedido dentro del arreglo de pedidos asignados"
           }
         ],
         "responses": {

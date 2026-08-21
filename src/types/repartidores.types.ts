@@ -4,17 +4,18 @@ interface repartidores {
   vehiculo: string;
   activo: boolean;
   pedidosAsignados: number[];
+  telefono: string;
 }
 interface crearRepartidor {
   nombre: string;
   vehiculo: string;
-  pedidosAsignados?: number[];
+  telefono: string;
+  activo: boolean;
 }
 interface actualizarRepartidor {
-  nombre: string;
   vehiculo: string;
   activo: boolean;
-  pedidosAsignados: number[];
+  telefono: string;
 }
 interface repartidoresFiltrados {
   nombre?: string;
