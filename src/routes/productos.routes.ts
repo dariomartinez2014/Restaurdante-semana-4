@@ -138,22 +138,16 @@ router.put(
         required: true,
         type: 'number'
       }
-      #swagger.requestBody = {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                nombre: { type: 'string', example: 'Hamburguesa Doble' },
-                categoria: { type: 'string', example: 'comida' },
-                precio: { type: 'number', example: 30 },
-                disponible: { type: 'boolean', example: false }
-              }
-            }
-          }
+      #swagger.parameters['body'] = {
+      in: 'body',
+      description: 'Datos a actualizar del producto',
+      required: true,
+        schema: {
+          nombre: 'nombre',
+          categoria: 'comida, bebida, etc.',
+          precio: 50
         }
-      }
+      }    
       #swagger.responses[200] = { description: 'Producto actualizado' }
       #swagger.responses[400] = { description: 'Precio inválido' }
       #swagger.responses[404] = { description: 'Producto no encontrado' }
