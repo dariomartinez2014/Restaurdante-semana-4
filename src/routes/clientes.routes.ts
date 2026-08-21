@@ -50,12 +50,7 @@ router.get("/:id", (req: Request, res: Response) => {
 router.post("/", (req: Request, res: Response) => {
   const { nombre, apellidos, telefono, direccion, ciudad, email } = req.body;
 
-  if (
-    typeof nombre !== "string" ||
-    typeof telefono !== "number" ||
-    typeof direccion !== "string" ||
-    typeof ciudad !== "string"
-  ) {
+  if (!nombre || !telefono || !direccion || !ciudad) {
     return res.status(400).json({
       mensaje: "estos datos son obligatorios y deben ser del tipo correcto",
     });
