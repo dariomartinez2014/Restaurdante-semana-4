@@ -1,35 +1,65 @@
 import express from "express";
 import type { Request, Response } from "express";
-import repartidoresRouter from "./routes/repartidores.routes.js";
-import clientesRouter from "./routes/clientes.routes.js";
 import pedidosRouter from "./routes/pedidos.routes.js";
-import productosRouter from "./routes/productos.routes.js";
-import swaggerUi from "swagger-ui-express";
-import fs from "node:fs";
-import path from "node:path";
+import cors from "cors";
+import dotenv from "dotenv";
+import { pool } from "./db.js";
+dotenv.config();
+
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-const swaggerFilePath = path.resolve("./src/swagger-output.json");
-if (fs.existsSync(swaggerFilePath)) {
-  const swaggerDocument = JSON.parse(fs.readFileSync(swaggerFilePath, "utf-8"));
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-} else {
-  console.log("archivo swagger-output.json no encontrado");
-}
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("El servidor esta en pie");
+app.get("/productos", async function (req: Request, res: Response) {
+  try {
+    const result = await pool.query("SELECT * FROM pedidos;");
+    res.json({
+      message: "Conexion exitosa a la base de datos :D",
+      total: result.rowCount,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("error al consultar PostgreSQL: ");
+    res.status(500).json({
+      message: "error al intentar conectar a la base de datos :c",
+    });
+  }
 });
 
-app.use("/repartidor", repartidoresRouter);
-app.use("/clientes", clientesRouter);
-app.use("/productos", productosRouter);
+app.get("db-test", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query("SELECT * FROM pedidos;");
+    res.json({
+      message: "coneccion exitosa a la base de datos",
+      total: result.rowCount,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("error al consultar en la base de datos");
+    res.status(500).json({
+      message: "error al intentar conectar a la base de datos",
+    });
+  }
+});
+
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "servidor corriendo exitosamente",
+  });
+});
+
 app.use("/pedidos", pedidosRouter);
 
 // aplicacion escuchando el puerto 3000
-app.listen(PORT, async () => {
-  console.log(`servidor corriendo en el puerto : http://localhost:${PORT}`);
+app.listen(PORT, async function () {
+  console.log("servidor corriendo en http://localhost" + PORT);
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log(
+      `CONECTADO A POSTGRESQL CON EXITO HORA DEL SERVIDOR ${res.rows[0].now}`,
+    );
+  } catch (error) {
+    console.log("ERROR EN LA CONEXION");
+  }
 });

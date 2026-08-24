@@ -1,7 +1,7 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { listaPedidos } from "../data/pedidos.data.js";
-import { listaClientes } from "../data/clientes.js";
+import { pool } from "../db.js";
 
 import type {
   Pedido,
@@ -15,218 +15,114 @@ const router = Router();
 
 // GET /pedidos
 // Lista todos los pedidos y permite filtrar por estado
-router.get(
-  "/",
-  function (req: Request<{}, {}, {}, pedidosFiltrados>, res: Response) {
-    /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Obtener todos los pedidos'
-      #swagger.description = 'Obtiene la lista de pedidos y permite filtrarlos por estado'
-
-      #swagger.parameters['estado'] = {
-        in: 'query',
-        description: 'Filtrar pedidos por estado',
-        required: false,
-        type: 'boolean'
-      }
-    */
-
-    const estado = req.query.estado;
-
-    let resultado = [...listaPedidos];
-
-    if (estado) {
-      if (estado.toLowerCase() !== "true" && estado.toLowerCase() !== "false") {
-        return res.json({ error: "el estado activo debe ser true o false" });
-      }
-      const entregado = estado.toLowerCase() === "true";
-      resultado = resultado.filter((e) => e.estado === entregado);
-    }
-
-    return res.json({
-      total: resultado.length,
-      datos: resultado,
+router.get("/productos", async function (req: Request, res: Response) {
+  try {
+    const result = await pool.query("SELECT * FROM pedidos;");
+    res.json({
+      message: "Conexion exitosa a la base de datos :D",
+      total: result.rowCount,
+      data: result.rows,
     });
-  },
-);
+  } catch (error) {
+    console.error("error al consultar PostgreSQL: ");
+    res.status(500).json({
+      message: "error al intentar conectar a la base de datos :c",
+    });
+  }
+});
 
 // GET /pedidos/:id
 // Buscar un pedido específico
-router.get("/:id", function (req: Request<idParams>, res: Response) {
-  /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Obtener un pedido por ID'
-
-      #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID del pedido',
-        required: true,
-        type: 'integer'
-      }
-    */
-
-  const idBuscado = Number(req.params.id);
-
-  if (isNaN(idBuscado)) {
-    return res.status(400).json({
-      error: "El id debe ser un número válido",
-    });
+router.get("/pedidos/:id", async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
+    }
+    const resu = await pool.query("SELECT * FROM pedidos WHERE id =$1", [id]);
+    if (resu.rows.length === 0) {
+      res.status(404).json({ error: "Pedido no encontrado" });
+      return;
+    }
+    res.json(resu.rows[0]);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
-
-  const pedido = listaPedidos.find((e) => e.id === idBuscado);
-
-  if (!pedido) {
-    return res.status(404).json({
-      error: "No existe un pedido con ese ID",
-    });
-  }
-
-  return res.json(pedido);
 });
 
 // POST /pedidos
 // Crear un pedido
-router.post("/", function (req: Request<{}, {}, crearPedido>, res: Response) {
-  /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Crear una nueva orden de pedido'
+router.post("/pedidos", async (req: Request, res: Response) => {
+  try {
+    const { cliente_id, detalles, total, estado } = req.body;
+    if (!cliente_id || !detalles || !total || !estado) {
+      res.status(400).json({ error: "faltan datos obligatorios" });
+    }
+    const query =
+      "INSERT INTO pedidos (cliente_id, detalles , total, estado) VALUES ($1,$2,$3,$4) RETURNING *;";
+    const result = await pool.query(query, [
+      cliente_id,
+      detalles,
+      total,
+      estado,
+    ]);
 
-      #swagger.parameters['body'] = {
-        in: 'body',
-        description: 'Datos para crear una nueva orden de pedido',
-        required: true,
-        schema: {
-          clienteId: 1,
-          detalles: "2 hamburguesas y 1 gaseosa",
-          total: 80,
-          estado: false
-        }
-      }
-    */
-
-  const { clienteId, detalles, total } = req.body;
-
-  // Verificar que el cliente exista
-
-  const cliente = listaClientes.find((e) => e.id === clienteId);
-
-  if (!cliente) {
-    return res.status(404).json({
-      error: "No existe un cliente con ese ID",
-    });
+    res.status(201).json(result.rows[0]);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
-
-  // Validar datos obligatorios
-
-  if (clienteId === undefined || !detalles || total === undefined) {
-    return res.status(400).json({
-      error: "Faltan datos obligatorios",
-    });
-  }
-
-  // Crear pedido
-
-  const nuevoPedido: Pedido = {
-    id:
-      listaPedidos.length > 0
-        ? listaPedidos[listaPedidos.length - 1]!.id + 1
-        : 1,
-
-    clienteId,
-    detalles,
-    total,
-
-    // Todo pedido nuevo empieza como false
-    estado: false,
-  };
-
-  listaPedidos.push(nuevoPedido);
-  return res.status(201).json(nuevoPedido);
 });
 
-// PUT /pedidos/:id
 // Actualizar el estado del pedido
-router.put(
-  "/:id",
-  function (req: Request<idParams, {}, actualizarPedido>, res: Response) {
-    /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Actualizar el estado de un pedido'
-
-      #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID del pedido',
-        required: true,
-        type: 'integer'
-      }
-
-      #swagger.parameters['body'] = {
-        in: 'body',
-        description: 'Cambiar el estado del pedido',
-        required: true,
-        schema: {
-          estado: true
-        }
-      }
-    */
-
-    const idBuscado = Number(req.params.id);
-
-    const index = listaPedidos.findIndex((e) => e.id === idBuscado);
-
-    if (index === -1) {
-      return res.status(404).json({
-        error: "Pedido no encontrado",
-      });
+router.put("/productos/:id", async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
     }
-
-    const { estado } = req.body;
-
-    if (typeof estado !== "boolean") {
-      return res.status(400).json({
-        error: "El estado debe ser true o false",
-      });
+    const resu = await pool.query("SELECT * FROM pedidos WHERE id =$1", [id]);
+    if (resu.rows.length === 0) {
+      res.status(404).json({ error: "Pedido no encontrado" });
+      return;
     }
-
-    listaPedidos[index]!.estado = estado;
-
-    return res.json({
-      mensaje: "Estado del pedido actualizado exitosamente",
-      pedido: listaPedidos[index],
-    });
-  },
-);
+    const { cliente_id, detalles, total, estado } = req.body;
+    if (!cliente_id || !detalles || !total || !estado) {
+      res.status(400).json({ error: "faltan datos obligatorios" });
+    }
+    const query = `UPDATE pedidos
+            SET cliente_id = $1,
+            detalles = $2,
+            total = $3,
+            estado= $4
+            WHERE id = $4
+            RETURNING *;
+`;
+    const result = await pool.query(query, [
+      cliente_id,
+      detalles,
+      total,
+      estado,
+      id,
+    ]);
+    res.status(202).json(result.rows[0]);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // DELETE /pedidos/:id
 // Cancelar y eliminar pedido
-router.delete("/:id", function (req: Request<idParams>, res: Response) {
-  /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Cancelar y eliminar un pedido'
-
-      #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID del pedido a eliminar',
-        required: true,
-        type: 'integer'
-      }
-    */
-
-  const idBuscado = Number(req.params.id);
-
-  const index = listaPedidos.findIndex((e) => e.id === idBuscado);
-
-  if (index === -1) {
-    return res.status(404).json({
-      error: "Pedido no encontrado",
-    });
+router.delete("/productos/:id", async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
+    }
+    const resu = await pool.query("DELETE FROM pedidos WHERE id = $1;", [id]);
+    res.status(200).json({ message: "pedido eliminado exitosamente" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
-
-  listaPedidos.splice(index, 1);
-
-  return res.json({
-    mensaje: "Pedido cancelado y eliminado exitosamente",
-  });
 });
 
 export default router;
