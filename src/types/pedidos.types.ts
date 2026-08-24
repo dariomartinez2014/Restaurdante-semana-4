@@ -1,20 +1,20 @@
 interface Pedido {
   id: number;
-  clienteId: number;
+  cliente_id: number;
   detalles: string;
   total: number;
-  estado: boolean;
+  estado: string;
 }
 
 interface crearPedido {
-  clienteId: number;
+  cliente_id: number;
   detalles: string;
   total: number;
-  estado: boolean;
+  estado: string;
 }
 
 interface actualizarPedido {
-  estado: boolean;
+  estado: string;
 }
 
 interface pedidosFiltrados {
