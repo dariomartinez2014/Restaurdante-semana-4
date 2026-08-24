@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { listaClientes, setListaClientes } from "../data/clientes.js";
+import pool from "../config/database.js";
 import type {
   Cliente,
   crearCliente,
@@ -14,7 +14,7 @@ const router = Router();
 //endpoint GET clientes filtros
 router.get(
   "/",
-  function (req: Request<{}, {}, {}, clientesFiltrados>, res: Response) {
+async function (req: Request<{}, {}, {}, clientesFiltrados>, res: Response) {
     // #swagger.tags = ['Clientes']
     // #swagger.description = 'Obtiene la lista de clientes con filtros'
     /*  #swagger.parameters['ciudad'] = {
@@ -24,25 +24,25 @@ router.get(
     } */
 
     const ciudad = req.query.cuidad;
-    let resultado = [...listaClientes];
+    const resultado = await pool.query("SELECT * FROM clientes");
 
     //filtro para el estado activo del repartidor
     if (ciudad) {
-      resultado = resultado.filter(
+      resultado.rows = resultado.rows.filter(
         (e) => e.ciudad.toLowerCase() === ciudad.toLowerCase(),
       );
     }
 
     // mostrar el resultado filtrado
-    return res.json({
-      total: resultado.length,
-      datos: resultado,
-    });
+     return res.json({
+    total: resultado.rows.length,
+    datos: resultado.rows,
+});
   },
 );
 
 //GET clientes/:id
-router.get("/:id", function (req: Request<idParams>, res: Response) {
+router.get("/:id", async function (req: Request<idParams>, res: Response) {
   // #swagger.tags = ['Clientes']
   // #swagger.description = 'Obtiene la informacion de un Cliente en especifico por su id'
   /*  #swagger.parameters['id'] = {
@@ -58,16 +58,17 @@ router.get("/:id", function (req: Request<idParams>, res: Response) {
       .status(400)
       .json({ error: "El parametro id debe ser un numero valido" });
   }
-  const clienteFiltrado = listaClientes.find((e) => e.id === idBuscado);
+  const resultado = await pool.query("SELECT * FROM clientes WHERE id = $1", [idBuscado]);
 
-  if (!clienteFiltrado) {
-    return res.status(404).json({ error: "no existe un cliente con ese ID" });
-  }
-  return res.json(clienteFiltrado);
+if (resultado.rows.length === 0) {
+  return res.status(404).json({ error: "no existe un cliente con ese ID" });
+}
+
+return res.json(resultado.rows[0]);
 });
 
 //POST clientes
-router.post("/", function (req: Request<{}, {}, crearCliente>, res: Response) {
+router.post("/", async function (req: Request<{}, {}, crearCliente>, res: Response) {
   /*
       #swagger.tags = ['Clientes']
       #swagger.summary = 'crear un cliente nuevo'
@@ -83,23 +84,26 @@ router.post("/", function (req: Request<{}, {}, crearCliente>, res: Response) {
         }
       }
     */
-  const { nombre, telefono, direccion, ciudad } = req.body;
-  if (!nombre || !direccion || !telefono || !ciudad) {
-    return res.status(400).json({ error: "faltan datos que son obligatorios" });
-  }
-  const nuevoCliente: Cliente = {
-    id: listaClientes.length > 0 ? listaClientes.length + 1 : 1,
-    nombre,
-    telefono,
-    direccion,
-    ciudad,
-  };
-  listaClientes.push(nuevoCliente);
-  res.status(201).json(nuevoCliente);
+       const { nombre, apellido, telefono, direccion, ciudad } = req.body;
+
+if (!nombre || !apellido || !direccion || !telefono || !ciudad) {
+  return res.status(400).json({
+    error: "faltan datos que son obligatorios"
+  });
+}
+
+const resultado = await pool.query(
+  `INSERT INTO clientes (nombre, apellido, telefono, direccion, ciudad)
+   VALUES ($1, $2, $3, $4, $5)
+   RETURNING *`,
+  [nombre, apellido, telefono, direccion, ciudad]
+);
+
+return res.status(201).json(resultado.rows[0]);
 });
 
 //PUT clientes/:id
-router.put("/:id", function (req: Request, res: Response) {
+router.put("/:id", async function (req: Request, res: Response) {
   /*
     #swagger.tags = ['Clientes']
     #swagger.summary = 'actualizar un cliente existente'
@@ -120,30 +124,22 @@ router.put("/:id", function (req: Request, res: Response) {
     }
   */
   const idBuscado = Number(req.params.id);
-  const index = listaClientes.findIndex(function (e) {
-    return e.id === idBuscado;
-  });
-  if (index === -1) {
-    return res.status(404).json({ error: "Cliente no encontrado" });
-  } else {
-    const cliente = listaClientes[index]!;
-    const { telefono, direccion }: actualizarCliente = req.body;
-
-    // actualizando la informacion del usuario
-    listaClientes[index] = {
-      id: idBuscado,
-      nombre: cliente.nombre,
-      apellidos: cliente.apellidos,
-      telefono: telefono ?? listaClientes[index]?.telefono,
-      direccion: direccion ?? listaClientes[index]?.direccion,
-      ciudad: cliente.ciudad,
-      email: cliente.email,
-    };
-    res.json(listaClientes[index]);
-  }
+ const { telefono, direccion }: actualizarCliente = req.body;
+ const resultado = await pool.query(
+  `UPDATE clientes
+   SET telefono = COALESCE($1, telefono),
+       direccion = COALESCE($2, direccion)
+   WHERE id = $3
+   RETURNING *`,
+  [telefono, direccion, idBuscado]
+);
+if (resultado.rows.length === 0) {
+  return res.status(404).json({ error: "Cliente no encontrado" });
+}
+return res.json(resultado.rows[0]);
 });
 
-router.delete("/:id", function (req: Request, res: Response) {
+router.delete("/:id", async function (req: Request, res: Response) {
   /*
     #swagger.tags = ['Clientes']
     #swagger.summary = 'eliminar un cliente'
@@ -155,18 +151,19 @@ router.delete("/:id", function (req: Request, res: Response) {
     }
   */
   const idBuscado = Number(req.params.id);
-  const index = listaClientes.findIndex(function (e) {
-    return e.id === idBuscado;
+ const resultado = await pool.query(
+  "DELETE FROM clientes WHERE id = $1 RETURNING *",
+  [idBuscado]
+);
+if (resultado.rows.length === 0) {
+  return res.status(404).json({
+    error: "Cliente no encontrado"
   });
-  if (index === -1) {
-    return res
-      .status(404)
-      .json({ error: "Cliente no encontrado no podemos eliminarlo" });
-  } else {
-    let Listanueva = listaClientes.filter((e) => e.id !== idBuscado);
-    setListaClientes(Listanueva);
-    res.json({ mensaje: "CLIENTE ELIMINADO EXITOSAMENTE" });
-  }
+}
+return res.json({
+  mensaje: "CLIENTE ELIMINADO EXITOSAMENTE",
+  cliente: resultado.rows[0]
+});
 });
 
 export default router;

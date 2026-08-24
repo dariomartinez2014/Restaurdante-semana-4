@@ -10,6 +10,7 @@ interface Cliente {
 
 interface crearCliente {
   nombre: string;
+  apellido: string;
   direccion: string;
   telefono: string;
   ciudad: string;

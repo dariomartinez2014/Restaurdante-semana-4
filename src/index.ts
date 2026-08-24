@@ -7,6 +7,7 @@ import productosRouter from "./routes/productos.routes.js";
 import swaggerUi from "swagger-ui-express";
 import fs from "node:fs";
 import path from "node:path";
+import pool from "./config/database.js";
 const app = express();
 const PORT = 3000;
 
