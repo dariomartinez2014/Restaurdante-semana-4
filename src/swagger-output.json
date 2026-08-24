@@ -11,6 +11,16 @@
     "http"
   ],
   "paths": {
+    "/repartidor": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "description": "",
@@ -450,6 +460,29 @@
             "required": true,
             "type": "number",
             "description": "ID del producto a modificar"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos a actualizar del producto",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "nombre"
+                },
+                "categoria": {
+                  "type": "string",
+                  "example": "comida, bebida, etc."
+                },
+                "precio": {
+                  "type": "number",
+                  "example": 50
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -461,34 +494,6 @@
           },
           "404": {
             "description": "Producto no encontrado"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nombre": {
-                    "type": "string",
-                    "example": "Hamburguesa Doble"
-                  },
-                  "categoria": {
-                    "type": "string",
-                    "example": "comida"
-                  },
-                  "precio": {
-                    "type": "number",
-                    "example": 30
-                  },
-                  "disponible": {
-                    "type": "boolean",
-                    "example": false
-                  }
-                }
-              }
-            }
           }
         }
       },

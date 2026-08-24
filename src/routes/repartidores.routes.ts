@@ -4,6 +4,7 @@ import {
   listaRepartidores,
   setListaRepartidores,
 } from "../data/repartidores.data.js";
+import { poolRepartidores } from "..//data/repartidores.data.js";
 
 import type {
   repartidores,
@@ -17,36 +18,55 @@ const router = Router();
 
 //endpoints
 //repartidor filtrado por estado
-router.get(
-  "/",
-  function (req: Request<{}, {}, {}, repartidoresFiltrados>, res: Response) {
-    // #swagger.tags = ['Repartidores']
-    // #swagger.description = 'Obtiene la lista de repartidores con filtros'
-    /*  #swagger.parameters['activo'] = {
-            in: 'query',
-            description: 'Estado del repartidor (true o false)',
-            type: 'string'
-    } */
+router.get("/", async function (req: Request, res: Response) {
+  try {
+    const { activo } = req.query;
 
-    const activo = req.query.activo;
-    let resultado = [...listaRepartidores];
+    let queryText = "SELECT * FROM repartidores";
+    const queryParams: any[] = [];
 
-    //filtro para el estado activo del repartidor
-    if (activo) {
-      if (activo.toLowerCase() !== "true" && activo.toLowerCase() !== "false") {
-        return res.json({ error: "el estado activo debe ser true o false" });
+    // Validar si viene el parámetro 'activo' y construir la consulta
+    if (activo !== undefined) {
+      if (activo === "true" || activo === "false") {
+        queryText += " WHERE activo = $1";
+        queryParams.push(activo === "true");
+      } else {
+        return res.status(400).json({
+          error: "El parámetro 'activo' debe ser 'true' o 'false'",
+        });
       }
-      const esActivo = activo.toLowerCase() === "true";
-      resultado = resultado.filter((e) => e.activo === esActivo);
     }
 
-    // mostrar el resultado filtrado
-    return res.json({
-      total: resultado.length,
-      datos: resultado,
+    queryText += ";";
+
+    const resultado = await poolRepartidores.query(queryText, queryParams);
+
+    res.json({
+      message: "Conexión exitosa a la DB",
+      total: resultado.rowCount,
+      data: resultado.rows,
     });
-  },
-);
+  } catch (error) {
+    console.error("Error en la consulta a la DB:", error);
+    res.status(500).json({ error: "Error al conectar con la DB" });
+  }
+});
+
+router.get("/db-test", async function (req: Request, res: Response) {
+  try {
+    const resultado = await poolRepartidores.query(
+      "SELECT * FROM repartidores;",
+    );
+    res.json({
+      message: "Conexion exitosa a la DB",
+      total: resultado.rowCount,
+      data: resultado.rows,
+    });
+  } catch (error) {
+    console.error("error en la consulta a la DB");
+    res.status(500).json({ error: "Error al conectar con la DB" });
+  }
+});
 
 //endpoint para traer a un repartidor especifico por su id
 
@@ -80,7 +100,7 @@ router.get("/:id", function (req: Request<pedidosParams>, res: Response) {
 
 router.post(
   "/",
-  function (req: Request<{}, {}, crearRepartidor>, res: Response) {
+  async function (req: Request<{}, {}, crearRepartidor>, res: Response) {
     /*
       #swagger.tags = ['Repartidores']
       #swagger.summary = 'crear un repartidor nuevo'
@@ -102,26 +122,35 @@ router.post(
         .status(400)
         .json({ error: "faltan datos que son obligatorios" });
     }
-    if (activo !== true && activo !== false) {
+    if (typeof activo !== "boolean") {
       return res.status(400).json({
         error: "El campo activo solamente puede ser true o false",
       });
     }
-    const nuevoRepartidor: repartidores = {
-      id: listaRepartidores.length > 0 ? listaRepartidores.length + 1 : 1,
-      nombre,
-      vehiculo,
-      telefono,
-      activo,
-      pedidosAsignados: [],
-    };
-    listaRepartidores.push(nuevoRepartidor);
-    res.status(201).json(nuevoRepartidor);
+    try {
+      const query = `
+        INSERT INTO repartidores (nombre, vehiculo, telefono, activo)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *;
+      `;
+      const values = [nombre, vehiculo, telefono, activo];
+      const { rows } = await poolRepartidores.query(query, values);
+
+      return res.status(201).json(rows[0]);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Error al crear el repartidor" });
+    }
   },
 );
 
-router.put("/:id", function (req: Request, res: Response) {
-  /*
+router.put(
+  "/:id",
+  async function (
+    req: Request<{ id: string }, {}, crearRepartidor>,
+    res: Response,
+  ) {
+    /*
     #swagger.tags = ['Repartidores']
     #swagger.summary = 'actualizar un repartidor existente'
     #swagger.parameters['id'] = {
@@ -141,37 +170,37 @@ router.put("/:id", function (req: Request, res: Response) {
       }
     }
   */
-  const idBuscado = Number(req.params.id);
-  const index = listaRepartidores.findIndex(function (e) {
-    return e.id === idBuscado;
-  });
-  if (index === -1) {
-    return res.status(404).json({ error: "Repartidor no encontrado" });
-  } else {
-    const repartidor = listaRepartidores[index]!;
-    const { vehiculo, activo, telefono }: actualizarRepartidor = req.body;
+    const { id } = req.params;
+    const { nombre, vehiculo, telefono, activo } = req.body;
 
-    // Validando que activo solamente sea true o false
-    if (activo !== undefined && activo !== true && activo !== false) {
-      return res.status(400).json({
-        error: "El campo activo solamente puede ser true o false",
-      });
+    try {
+      const query = `
+        UPDATE repartidores
+        SET nombre = $1, vehiculo = $2, telefono = $3, activo = $4
+        WHERE id = $5
+        RETURNING *;
+      `;
+      const values = [nombre, vehiculo, telefono, activo, id];
+      const { rows } = await poolRepartidores.query(query, values);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Repartidor no encontrado" });
+      }
+
+      return res.status(200).json(rows[0]);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "Error al actualizar el repartidor" });
     }
-    // actualizando la informacion del usuario
-    listaRepartidores[index] = {
-      id: idBuscado,
-      nombre: repartidor.nombre,
-      vehiculo: vehiculo ?? listaRepartidores[index]?.vehiculo,
-      activo: activo ?? listaRepartidores[index]?.activo,
-      pedidosAsignados: repartidor.pedidosAsignados,
-      telefono: telefono ?? listaRepartidores[index]?.telefono,
-    };
-    res.json(listaRepartidores[index]);
-  }
-});
-//ELIMINACION DE UN REPARTIDOR
-router.delete("/:id", function (req: Request, res: Response) {
-  /*
+  },
+);
+
+router.delete(
+  "/:id",
+  async function (req: Request<{ id: string }>, res: Response) {
+    /*
     #swagger.tags = ['Repartidores']
     #swagger.summary = 'eliminar un repartidor'
     #swagger.parameters['id'] = {
@@ -181,19 +210,29 @@ router.delete("/:id", function (req: Request, res: Response) {
       type: 'integer'
     }
   */
-  const idBuscado = Number(req.params.id);
-  const index = listaRepartidores.findIndex(function (e) {
-    return e.id === idBuscado;
-  });
-  if (index === -1) {
-    return res
-      .status(404)
-      .json({ error: "Repartidor no encontrado no podemos eliminarlo" });
-  } else {
-    let Listanueva = listaRepartidores.filter((e) => e.id !== idBuscado);
-    setListaRepartidores(Listanueva);
-    res.json({ mensaje: "REPARTIDOR ELIMINADO EXITOSAMENTE" });
-  }
-});
+    const { id } = req.params;
+
+    try {
+      const query = `
+        DELETE FROM repartidores
+        WHERE id = $1
+        RETURNING *;
+      `;
+      const { rows } = await poolRepartidores.query(query, [id]);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Repartidor no encontrado" });
+      }
+
+      return res.status(200).json({
+        message: "Repartidor eliminado exitosamente",
+        repartidor: rows[0],
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Error al eliminar el repartidor" });
+    }
+  },
+);
 
 export default router;
