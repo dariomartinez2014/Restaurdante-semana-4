@@ -4,8 +4,12 @@ import pedidosRouter from "./routes/pedidos.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pool } from "./db.js";
-dotenv.config();
+import productosRouter from "./routes/productos.routes.js";
+import swaggerUi from "swagger-ui-express";
+import fs from "node:fs";
+import path from "node:path";
 
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
