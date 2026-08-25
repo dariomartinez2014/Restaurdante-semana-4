@@ -124,7 +124,13 @@ export async function putPedido(req: Request, res: Response) {
     if (isNaN(id)) {
       res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
     }
-    const pedidoUpdate = await PedidosModel.update(id, req.body);
+    const { cliente_id, detalles, total, estado } = req.body;
+    const pedidoUpdate = await PedidosModel.update(id, {
+      cliente_id,
+      detalles,
+      total,
+      estado,
+    });
     if (!pedidoUpdate) {
       res.status(404).json({ error: "pedido no encontrado" });
       return;
