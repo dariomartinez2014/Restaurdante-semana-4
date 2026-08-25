@@ -16,8 +16,16 @@ export type UpdatePedidoInput = Partial<CreatePedidoInput>;
 
 //FUNCIONES Q CONSULTAN A LA BASE DE DATOS
 export const PedidosModel = {
-  findAll: async (): Promise<pedido[]> => {
+  findAll: async (estado?: string): Promise<pedido[]> => {
+    if (estado) {
+      const { rows } = await pool.query(
+        "SELECT * FROM pedidos WHERE estado = $1 ORDER BY id ASC;",
+        [estado],
+      );
+      return rows;
+    }
     const { rows } = await pool.query("SELECT * FROM pedidos ORDER BY id ASC;");
+
     return rows;
   },
   findById: async (id: number): Promise<pedido | null> => {
