@@ -44,6 +44,28 @@ app.get("/db-test", async (req: Request, res: Response) => {
   }
 });
 
+// DEBUG TEMPORAL:
+// muestra las columnas reales que la API está viendo en la tabla pedidos
+app.get(
+  "/debug-pedidos-columns",
+  async (req: Request, res: Response) => {
+    try {
+      const result = await pool.query(`
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = 'pedidos'
+        ORDER BY ordinal_position;
+      `);
+
+      res.json(result.rows);
+    } catch (error: any) {
+      res.status(500).json({
+        error: error.message,
+      });
+    }
+  },
+);
+
 // Rutas del proyecto
 app.use("/pedidos", pedidosRouter);
 app.use("/clientes", clientesRouter);
@@ -56,6 +78,7 @@ app.listen(PORT, async () => {
 
   try {
     const result = await pool.query("SELECT NOW()");
+
     console.log(
       `Conectado a PostgreSQL. Hora del servidor: ${result.rows[0].now}`,
     );

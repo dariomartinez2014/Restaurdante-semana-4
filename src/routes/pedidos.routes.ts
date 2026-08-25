@@ -1,127 +1,193 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { listaPedidos } from "../data/pedidos.data.js";
 import { pool } from "../db.js";
-
-import type {
-  Pedido,
-  crearPedido,
-  actualizarPedido,
-  pedidosFiltrados,
-  idParams,
-} from "../types/pedidos.types.js";
 
 const router = Router();
 
 // GET /pedidos
-// Lista todos los pedidos y permite filtrar por estado
-router.get("/productos", async function (req: Request, res: Response) {
+// Obtener todos los pedidos
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const result = await pool.query("SELECT * FROM pedidos;");
+    const result = await pool.query(
+      "SELECT * FROM pedidos ORDER BY id;"
+    );
+
     res.json({
-      message: "Conexion exitosa a la base de datos :D",
       total: result.rowCount,
-      data: result.rows,
+      datos: result.rows,
     });
-  } catch (error) {
-    console.error("error al consultar PostgreSQL: ");
+  } catch (error: any) {
+    console.error("Error al obtener pedidos:", error);
+
     res.status(500).json({
-      message: "error al intentar conectar a la base de datos :c",
+      error: error.message,
     });
   }
 });
 
 // GET /pedidos/:id
-// Buscar un pedido específico
-router.get("/pedidos/:id", async (req: Request, res: Response) => {
+// Obtener un pedido por ID
+router.get("/:id", async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
-    }
-    const resu = await pool.query("SELECT * FROM pedidos WHERE id =$1", [id]);
-    if (resu.rows.length === 0) {
-      res.status(404).json({ error: "Pedido no encontrado" });
+      res.status(400).json({
+        error: "El ID debe ser un número",
+      });
       return;
     }
-    res.json(resu.rows[0]);
+
+    const result = await pool.query(
+      "SELECT * FROM pedidos WHERE id = $1;",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        error: "Pedido no encontrado",
+      });
+      return;
+    }
+
+    res.json(result.rows[0]);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // POST /pedidos
-// Crear un pedido
-router.post("/pedidos", async (req: Request, res: Response) => {
+// Crear un nuevo pedido
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const { cliente_id, detalles, total, estado } = req.body;
-    if (!cliente_id || !detalles || !total || !estado) {
-      res.status(400).json({ error: "faltan datos obligatorios" });
+    const { cliente_id, estado, total } = req.body;
+
+    if (
+      !cliente_id ||
+      typeof estado !== "string" ||
+      total === undefined
+    ) {
+      res.status(400).json({
+        error: "cliente_id, estado y total son obligatorios",
+      });
+      return;
     }
-    const query =
-      "INSERT INTO pedidos (cliente_id, detalles , total, estado) VALUES ($1,$2,$3,$4) RETURNING *;";
+
+    const query = `
+      INSERT INTO pedidos
+      (cliente_id, fecha, estado, total)
+      VALUES ($1, NOW(), $2, $3)
+      RETURNING *;
+    `;
+
     const result = await pool.query(query, [
       cliente_id,
-      detalles,
-      total,
       estado,
+      total,
     ]);
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error("Error al crear pedido:", error);
+
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// Actualizar el estado del pedido
-router.put("/productos/:id", async (req: Request, res: Response) => {
+// PUT /pedidos/:id
+// Actualizar un pedido
+router.put("/:id", async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
-    }
-    const resu = await pool.query("SELECT * FROM pedidos WHERE id =$1", [id]);
-    if (resu.rows.length === 0) {
-      res.status(404).json({ error: "Pedido no encontrado" });
+      res.status(400).json({
+        error: "El ID debe ser un número",
+      });
       return;
     }
-    const { cliente_id, detalles, total, estado } = req.body;
-    if (!cliente_id || !detalles || !total || !estado) {
-      res.status(400).json({ error: "faltan datos obligatorios" });
+
+    const { cliente_id, estado, total } = req.body;
+
+    if (
+      !cliente_id ||
+      typeof estado !== "string" ||
+      total === undefined
+    ) {
+      res.status(400).json({
+        error: "cliente_id, estado y total son obligatorios",
+      });
+      return;
     }
-    const query = `UPDATE pedidos
-            SET cliente_id = $1,
-            detalles = $2,
-            total = $3,
-            estado= $4
-            WHERE id = $4
-            RETURNING *;
-`;
+
+    const query = `
+      UPDATE pedidos
+      SET cliente_id = $1,
+          estado = $2,
+          total = $3
+      WHERE id = $4
+      RETURNING *;
+    `;
+
     const result = await pool.query(query, [
       cliente_id,
-      detalles,
-      total,
       estado,
+      total,
       id,
     ]);
-    res.status(202).json(result.rows[0]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        error: "Pedido no encontrado",
+      });
+      return;
+    }
+
+    res.json(result.rows[0]);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // DELETE /pedidos/:id
-// Cancelar y eliminar pedido
-router.delete("/productos/:id", async (req: Request, res: Response) => {
+// Eliminar un pedido
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
+      res.status(400).json({
+        error: "El ID debe ser un número",
+      });
+      return;
     }
-    const resu = await pool.query("DELETE FROM pedidos WHERE id = $1;", [id]);
-    res.status(200).json({ message: "pedido eliminado exitosamente" });
+
+    const result = await pool.query(
+      "DELETE FROM pedidos WHERE id = $1 RETURNING *;",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        error: "Pedido no encontrado",
+      });
+      return;
+    }
+
+    res.json({
+      message: "Pedido eliminado correctamente",
+      pedido: result.rows[0],
+    });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
