@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import pedidosRouter from "./routes/pedidos.routes.js";
 import clientesRouter from "./routes/clientes.routes.js";
 import productoRouter from "./routes/producto.routes.js";
+import repartidoresRouter from "./routes/repartidores.routes.js";
 
 import { pool } from "./config/db.js";
 
@@ -25,7 +26,7 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-// Prueba de conexión a PostgreSQL
+// Prueba de conexión con PostgreSQL
 app.get("/db-test", async (req: Request, res: Response) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -47,6 +48,7 @@ app.get("/db-test", async (req: Request, res: Response) => {
 app.use("/pedidos", pedidosRouter);
 app.use("/clientes", clientesRouter);
 app.use("/productos", productoRouter);
+app.use("/repartidores", repartidoresRouter);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
