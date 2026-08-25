@@ -1,88 +1,32 @@
-import express from "express";
-import type { Request, Response } from "express";
+import expres from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
-import pedidosRouter from "./routes/pedidos.routes.js";
-import clientesRouter from "./routes/clientes.routes.js";
-import productoRouter from "./routes/producto.routes.js";
-import repartidoresRouter from "./routes/repartidores.routes.js";
-
 import { pool } from "./config/db.js";
-
+import type { Request, Response } from "express";
+import productsRouter from "./routes/pedidos.routes.js";
 dotenv.config();
-
-const app = express();
+const app = expres();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors());
-app.use(express.json());
 
-// Ruta principal
-app.get("/", (req: Request, res: Response) => {
+app.use(expres.json());
+
+app.use("/productos", productsRouter);
+
+app.get("/", function (req: Request, res: Response) {
   res.json({
-    message: "Servidor corriendo exitosamente",
+    message: "servidor corriendo exitosamente",
   });
 });
-
-// Prueba de conexión con PostgreSQL
-app.get("/db-test", async (req: Request, res: Response) => {
+app.listen(PORT, async function () {
+  console.log("servidor corriendo en http://localhost:" + PORT);
   try {
-    const result = await pool.query("SELECT NOW()");
-
-    res.json({
-      message: "Conexión exitosa a PostgreSQL",
-      fechaServidor: result.rows[0].now,
-    });
-  } catch (error) {
-    console.error("Error al consultar PostgreSQL:", error);
-
-    res.status(500).json({
-      message: "Error al conectar con PostgreSQL",
-    });
-  }
-});
-
-// DEBUG TEMPORAL:
-// muestra las columnas reales que la API está viendo en la tabla pedidos
-app.get(
-  "/debug-pedidos-columns",
-  async (req: Request, res: Response) => {
-    try {
-      const result = await pool.query(`
-        SELECT column_name, data_type
-        FROM information_schema.columns
-        WHERE table_name = 'pedidos'
-        ORDER BY ordinal_position;
-      `);
-
-      res.json(result.rows);
-    } catch (error: any) {
-      res.status(500).json({
-        error: error.message,
-      });
-    }
-  },
-);
-
-// Rutas del proyecto
-app.use("/pedidos", pedidosRouter);
-app.use("/clientes", clientesRouter);
-app.use("/productos", productoRouter);
-app.use("/repartidores", repartidoresRouter);
-
-// Iniciar servidor
-app.listen(PORT, async () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-
-  try {
-    const result = await pool.query("SELECT NOW()");
-
+    const res = await pool.query("SELECT NOW()");
     console.log(
-      `Conectado a PostgreSQL. Hora del servidor: ${result.rows[0].now}`,
+      `CONECTADO A POSTGRESQL CON EXITO HORA DEL SERVIDOR ${res.rows[0].now}`,
     );
   } catch (error) {
-    console.error("Error en la conexión a PostgreSQL:", error);
+    console.log("ERROR EN LA CONEXION");
   }
 });
