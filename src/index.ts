@@ -3,7 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { pool } from "./config/db.js";
 import type { Request, Response } from "express";
-import productsRouter from "./routes/pedidos.routes.js";
+import pedidosRouter from "./routes/pedidos.routes.js";
+import productoRouter from "./routes/producto.routes.js";
 dotenv.config();
 const app = expres();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +13,9 @@ app.use(cors());
 
 app.use(expres.json());
 
-app.use("/productos", productsRouter);
+
+app.use("/pedidos", pedidosRouter);
+app.use("/productos", productoRouter);
 
 app.get("/", function (req: Request, res: Response) {
   res.json({
