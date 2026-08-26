@@ -8,6 +8,7 @@ import pedidosRouter from "./routes/pedidos.routes.js";
 import path from "node:path";
 import fs from "node:fs";
 import productoRouter from "./routes/producto.routes.js";
+import repartidoresRouter from "./routes/repartidores.routes.js";
 dotenv.config();
 const app = expres();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.use(expres.json());
 
 app.use("/pedidos", pedidosRouter);
 app.use("/productos", productoRouter);
+app.use("/repartidores", repartidoresRouter);
 
 const swaggerFilePath = path.resolve("./src/swagger-output.json");
 
