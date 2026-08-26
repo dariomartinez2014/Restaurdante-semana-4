@@ -64,7 +64,35 @@
         ],
         "summary": "Crear una nueva orden de pedido",
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para crear una nueva orden de pedido",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cliente_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "detalles": {
+                  "type": "string",
+                  "example": "2 hamburguesas y 1 gaseosa"
+                },
+                "total": {
+                  "type": "number",
+                  "example": 80
+                },
+                "estado": {
+                  "type": "string",
+                  "example": "pendiente"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -74,29 +102,6 @@
           },
           "500": {
             "description": "Internal Server Error"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "in": {
-                    "example": "any"
-                  },
-                  "description": {
-                    "example": "any"
-                  },
-                  "required": {
-                    "example": "any"
-                  },
-                  "schema": {
-                    "example": "any"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -135,7 +140,7 @@
         "tags": [
           "Pedidos"
         ],
-        "summary": "Actualizar el estado de un pedido",
+        "summary": "Actualizar un pedido",
         "description": "",
         "parameters": [
           {
@@ -146,6 +151,21 @@
               "type": "string"
             },
             "description": "ID del pedido"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos a actualizar. Puedes enviar uno o varios campos.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "estado": {
+                  "type": "string",
+                  "example": "entregado"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -160,29 +180,6 @@
           },
           "500": {
             "description": "Internal Server Error"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "in": {
-                    "example": "any"
-                  },
-                  "description": {
-                    "example": "any"
-                  },
-                  "required": {
-                    "example": "any"
-                  },
-                  "schema": {
-                    "example": "any"
-                  }
-                }
-              }
-            }
           }
         }
       },

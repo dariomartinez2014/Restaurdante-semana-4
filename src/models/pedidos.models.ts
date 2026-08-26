@@ -1,5 +1,6 @@
 import { create } from "node:domain";
 import { pool } from "../config/db.js";
+import type { UpdatePedidoInput } from "../schemas/pedidos.schema.js";
 
 //TIPADO DE LA TABLA
 export interface pedido {
@@ -12,7 +13,6 @@ export interface pedido {
 
 // apartir de el tipado crear otros types
 export type CreatePedidoInput = Omit<pedido, "id">;
-export type UpdatePedidoInput = Partial<CreatePedidoInput>;
 
 //FUNCIONES Q CONSULTAN A LA BASE DE DATOS
 export const PedidosModel = {
@@ -52,15 +52,15 @@ export const PedidosModel = {
   ): Promise<pedido | null> => {
     const { rows } = await pool.query(
       `UPDATE pedidos
-            SET cliente_id = $1,
-            detalles = $2,
-            total = $3,
-            estado = $4
-            WHERE id = $5
-            RETURNING *;
-`,
+     SET cliente_id = COALESCE($1, cliente_id),
+         detalles = COALESCE($2, detalles),
+         total = COALESCE($3, total),
+         estado = COALESCE($4, estado)
+     WHERE id = $5
+     RETURNING *;`,
       [dato.cliente_id, dato.detalles, dato.total, dato.estado, id],
     );
+
     return rows[0] || null;
   },
   delete: async (id: number): Promise<boolean> => {

@@ -1,5 +1,9 @@
 import type { Request, Response } from "express";
 import { PedidosModel } from "../models/pedidos.models.js";
+import {
+  createPedidoSchema,
+  updatePedidoSchema,
+} from "../schemas/pedidos.schema.js";
 
 export async function getPedidos(req: Request, res: Response) {
   /*
@@ -82,17 +86,14 @@ export async function postPedido(req: Request, res: Response) {
       }
     */
   try {
-    const { cliente_id, detalles, total, estado } = req.body;
-    if (!cliente_id || !detalles || !total || !estado) {
-      res.status(400).json({ error: "faltan datos obligatorios" });
+    const result = createPedidoSchema.safeParse(req.body);
+    console.log(result);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error.issues });
     }
-    const newPedido = await PedidosModel.create({
-      cliente_id,
-      detalles,
-      total,
-      estado,
-    });
-    res.status(201).json({ data: newPedido });
+    const newProduct = await PedidosModel.create(result.data);
+    res.status(201).json({ data: newProduct });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -100,44 +101,60 @@ export async function postPedido(req: Request, res: Response) {
 
 export async function putPedido(req: Request, res: Response) {
   /*
-      #swagger.tags = ['Pedidos']
-      #swagger.summary = 'Actualizar el estado de un pedido'
+  #swagger.tags = ['Pedidos']
+  #swagger.summary = 'Actualizar un pedido'
 
-      #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID del pedido',
-        required: true,
-        type: 'integer'
-      }
+  #swagger.parameters['id'] = {
+    in: 'path',
+    description: 'ID del pedido',
+    required: true,
+    type: 'integer'
+  }
 
-      #swagger.parameters['body'] = {
-        in: 'body',
-        description: 'Cambiar el estado del pedido',
-        required: true,
-        schema: {
-          estado: "entregado"
-        }
-      }
-    */
+  #swagger.parameters['body'] = {
+    in: 'body',
+    description: 'Datos a actualizar. Puedes enviar uno o varios campos.',
+    required: true,
+    schema: {
+      estado: "entregado"
+    }
+  }
+*/
+
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      res.status(400).json({ error: "EL ID DEBE SER UN VALOR NUMERICO" });
-    }
-    const { cliente_id, detalles, total, estado } = req.body;
-    const pedidoUpdate = await PedidosModel.update(id, {
-      cliente_id,
-      detalles,
-      total,
-      estado,
-    });
-    if (!pedidoUpdate) {
-      res.status(404).json({ error: "pedido no encontrado" });
+      res.status(400).json({
+        error: "EL ID DEBE SER UN VALOR NUMERICO",
+      });
       return;
     }
-    res.json({ data: pedidoUpdate });
+    const result = updatePedidoSchema.safeParse(req.body);
+
+    if (!result.success) {
+      res.status(400).json({
+        error: result.error.issues,
+      });
+      return;
+    }
+
+    const pedidoUpdate = await PedidosModel.update(id, result.data);
+
+    if (!pedidoUpdate) {
+      res.status(404).json({
+        error: "pedido no encontrado",
+      });
+      return;
+    }
+
+    res.json({
+      data: pedidoUpdate,
+    });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 }
 
