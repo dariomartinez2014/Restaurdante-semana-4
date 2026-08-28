@@ -7,6 +7,9 @@ import {
   deleteProducto,
 } from "../controllers/producto.controller.js";
 
+import { crearProductoSchema } from "../schemas/producto.schema.js";
+import { validateProducto } from "../middleware/producto.middleware.js";
+
 const router = Router();
 
 router.get("/", getProductos);
