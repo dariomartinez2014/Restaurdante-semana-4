@@ -6,13 +6,14 @@ import {
   putPedido,
   deletePedido,
 } from "../controllers/pedidos.controllers.js";
+import { validatePedidos } from "../middleware/pedidos.middleware.js";
 
 const router = Router();
 
 router.get("/", getPedidos);
 router.get("/:id", getPedidosById);
-router.post("/", postPedido);
-router.put("/:id", putPedido);
+router.post("/", validatePedidos, postPedido);
+router.put("/:id", validatePedidos, putPedido);
 router.delete("/:id", deletePedido);
 
 export default router;
