@@ -35,17 +35,50 @@
         "description": "Obtiene la lista de pedidos y permite filtrarlos por estado",
         "parameters": [
           {
-            "name": "estado",
+            "name": "page",
             "in": "query",
-            "description": "Filtrar pedidos por estado",
+            "description": "Número de página",
             "required": false,
-            "enum": [
-              "pendiente",
-              "preparando",
-              "entregado"
-            ],
+            "default": 1,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Cantidad de pedidos por página",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Buscar pedidos por estado",
+            "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "minTotal",
+            "in": "query",
+            "description": "Filtrar pedidos con total mínimo",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxTotal",
+            "in": "query",
+            "description": "Filtrar pedidos con total máximo",
+            "required": false,
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -64,35 +97,6 @@
         ],
         "summary": "Crear una nueva orden de pedido",
         "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Datos para crear una nueva orden de pedido",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "cliente_id": {
-                  "type": "number",
-                  "example": 1
-                },
-                "detalles": {
-                  "type": "string",
-                  "example": "2 hamburguesas y 1 gaseosa"
-                },
-                "total": {
-                  "type": "number",
-                  "example": 80
-                },
-                "estado": {
-                  "type": "string",
-                  "example": "pendiente"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -102,6 +106,29 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cliente_id": {
+                    "example": "any"
+                  },
+                  "detalles": {
+                    "example": "any"
+                  },
+                  "total": {
+                    "example": "any"
+                  },
+                  "estado": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -181,6 +208,29 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cliente_id": {
+                    "example": "any"
+                  },
+                  "detalles": {
+                    "example": "any"
+                  },
+                  "total": {
+                    "example": "any"
+                  },
+                  "estado": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -223,6 +273,17 @@
         ],
         "summary": "VER TODOS LOS PRODUCTOS",
         "description": "",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Número de página a consultar",
+            "default": 1,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -247,29 +308,6 @@
           },
           "500": {
             "description": "Internal Server Error"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "in": {
-                    "example": "any"
-                  },
-                  "description": {
-                    "example": "any"
-                  },
-                  "required": {
-                    "example": "any"
-                  },
-                  "schema": {
-                    "example": "any"
-                  }
-                }
-              }
-            }
           }
         }
       }

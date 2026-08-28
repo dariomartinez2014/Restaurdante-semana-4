@@ -4,6 +4,7 @@ import {
   createPedidoSchema,
   updatePedidoSchema,
 } from "../schemas/pedidos.schema.js";
+import { pedidoService } from "../services/pedidos.service.js";
 
 export async function getPedidos(req: Request, res: Response) {
   /*
@@ -11,29 +12,49 @@ export async function getPedidos(req: Request, res: Response) {
     #swagger.summary = 'Obtener todos los pedidos'
     #swagger.description = 'Obtiene la lista de pedidos y permite filtrarlos por estado'
 
-    #swagger.parameters['estado'] = {
-      in: 'query',
-      description: 'Filtrar pedidos por estado',
-      required: false,
-      type: 'string',
-      enum: ['pendiente', 'preparando', 'entregado']
-    }
+#swagger.parameters['page'] = {
+  in: 'query',
+  description: 'Número de página',
+  required: false,
+  type: 'integer',
+  default: 1
+}
+
+#swagger.parameters['limit'] = {
+  in: 'query',
+  description: 'Cantidad de pedidos por página',
+  required: false,
+  type: 'integer',
+  default: 10
+}
+
+#swagger.parameters['search'] = {
+  in: 'query',
+  description: 'Buscar pedidos por estado',
+  required: false,
+  type: 'string'
+}
+
+#swagger.parameters['minTotal'] = {
+  in: 'query',
+  description: 'Filtrar pedidos con total mínimo',
+  required: false,
+  type: 'number'
+}
+
+#swagger.parameters['maxTotal'] = {
+  in: 'query',
+  description: 'Filtrar pedidos con total máximo',
+  required: false,
+  type: 'number'
+}
   */
 
   try {
-    const { estado } = req.query;
-
-    const pedido = await PedidosModel.findAll(
-      estado ? String(estado) : undefined,
-    );
-
-    res.json({
-      totalPedidos: pedido.length,
-      data: pedido,
-    });
+    const result = await pedidoService.getPedidosFilters(req.query);
+    res.json(result);
   } catch (error) {
-    console.error("error al consultar PostgreSQL:");
-
+    console.error("error al consultar PostgreSQL: ");
     res.status(500).json({
       message: "error al intentar conectar a la base de datos :c",
     });
@@ -72,18 +93,6 @@ export async function postPedido(req: Request, res: Response) {
   /*
       #swagger.tags = ['Pedidos']
       #swagger.summary = 'Crear una nueva orden de pedido'
-
-      #swagger.parameters['body'] = {
-        in: 'body',
-        description: 'Datos para crear una nueva orden de pedido',
-        required: true,
-        schema: {
-          cliente_id: 1,
-          detalles: "2 hamburguesas y 1 gaseosa",
-          total: 80,
-          estado: "pendiente"
-        }
-      }
     */
   try {
     const result = createPedidoSchema.safeParse(req.body);

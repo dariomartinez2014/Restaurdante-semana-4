@@ -1,6 +1,6 @@
-import { create } from "node:domain";
+import type { z } from "zod";
 import { pool } from "../config/db.js";
-import type { UpdatePedidoInput } from "../schemas/pedidos.schema.js";
+import type { updatePedidoSchema } from "../schemas/pedidos.schema.js";
 
 //TIPADO DE LA TABLA
 export interface pedido {
@@ -11,8 +11,17 @@ export interface pedido {
   detalles: string;
 }
 
+export interface paginaResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // apartir de el tipado crear otros types
 export type CreatePedidoInput = Omit<pedido, "id">;
+export type UpdatePedidoInput = z.infer<typeof updatePedidoSchema>;
 
 //FUNCIONES Q CONSULTAN A LA BASE DE DATOS
 export const PedidosModel = {
@@ -69,5 +78,67 @@ export const PedidosModel = {
       [id],
     );
     return (rowCount ?? 0) > 0;
+  },
+  findWhitFilter: async (
+    page: number = 1,
+    limit: number = 10,
+    search?: string, // where estado ILIKE %${search}%
+    minTotal?: number, // where total >= ${minTotal}
+    maxTotal?: number, // where total <= ${maxTotal}
+  ): Promise<paginaResult<pedido>> => {
+    const conditions: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    // la construccion de las condiciones
+    if (search) {
+      conditions.push(`estado ILIKE $${paramIndex}`);
+      paramIndex++;
+      values.push(`%${search}%`);
+    }
+
+    if (minTotal !== undefined) {
+      conditions.push(`total >= $${paramIndex}`);
+      paramIndex++;
+      values.push(minTotal);
+    }
+
+    if (maxTotal !== undefined) {
+      conditions.push(`total <= $${paramIndex}`);
+      paramIndex++;
+      values.push(maxTotal);
+    }
+
+    // unir las condiciones existentes con AND
+    const whereUnited =
+      conditions.length > 0 ? `WHERE ${conditions.join(` AND `)}` : "";
+
+    // CONTEO TOTAL de pedidos que coinciden con los filtros aplicados
+    const countQuery = `SELECT COUNT(*) FROM pedidos ${whereUnited}`;
+    const countResult = await pool.query(countQuery, values);
+    const total = Number(countResult.rows[0].count);
+
+    // consulta de datos con limit y offset
+    const offset = (page - 1) * limit;
+
+    // agregar el limit y offset a los placeholder dinamicos
+    const dataValues = [...values, limit, offset];
+
+    const dataQuery = `
+    SELECT * FROM pedidos
+    ${whereUnited}
+    ORDER BY id ASC
+    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+  `;
+
+    const { rows } = await pool.query(dataQuery, dataValues);
+
+    return {
+      data: rows,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
   },
 };
