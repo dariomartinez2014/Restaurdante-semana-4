@@ -1,11 +1,21 @@
 import type { Request, Response } from "express";
 import { ProductoModel } from "../models/producto.model.js";
+import { crearProductoSchema } from "../schemas/producto.schema.js";
+import { productoService } from "../services/producto.service.js";
 
 // GET /productos
 export async function getProductos(req: Request, res: Response) {
   /*
     #swagger.tags = ['PRODUCTOS']
     #swagger.summary = 'VER TODOS LOS PRODUCTOS'
+
+    #swagger.parameters['pagina'] = {
+      in: 'query',
+      description: 'Pon el numero de pagina',
+      type: 'integer',
+      default: 1
+    }
+
     #swagger.responses[200] = {
       description: 'LISTA DE PRODUCTOS',
       schema: {
@@ -24,13 +34,13 @@ export async function getProductos(req: Request, res: Response) {
     }
   */
   try {
-    const product = await ProductoModel.findAll();
-    res.json({ totalProductos: product.length, data: product });
-  } catch (error: any) {
+    const product = await productoService.getProductosFilters(req.query);
+    res.json(product);
+  } catch (error) {
     console.error("Error al consultar productos:", error);
 
     return res.status(500).json({
-      error: error.message,
+      message: "Error en la conexión del servidor"
     });
   }
 }
@@ -57,6 +67,13 @@ export async function getProductosById(req: Request, res: Response) {
       return;
     }
     res.json({ data: product });
+    /*const product = await ProductoModel.findById(result.data.id);
+    if (!product) {
+      res.status(400).json({ error: "No se ha encontrado el producto" });
+      return;
+    }
+    
+    res.json({ data: product });*/
   } catch (error: any) {
     return res.status(500).json({
       error: error.message,
@@ -82,16 +99,12 @@ export async function postProducto(req: Request, res: Response) {
     }
   */
   try {
-    const { nombre, precio, categoria, disponibilidad } = req.body;
-    if (!nombre || !categoria || !precio || !disponibilidad) {
-      res.status(400).json({ error: "faltan datos obligatorios" });
+    const result = crearProductoSchema.safeParse(req.body);
+    console.log(result);
+    if (!result.success) {
+      return res.status(400).json({ error: result.error.issues });
     }
-    const newProduct = await ProductoModel.create({
-      nombre,
-      categoria,
-      precio,
-      disponibilidad,
-    });
+    const newProduct = await ProductoModel.create(result.data);
     res.status(201).json({ data: newProduct });
   } catch (error: any) {
     return res.status(500).json({
