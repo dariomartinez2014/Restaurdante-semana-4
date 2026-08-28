@@ -11,13 +11,14 @@ import productoRouter from "./routes/producto.routes.js";
 dotenv.config();
 const app = expres();
 const PORT = process.env.PORT || 3000;
-
+import repartidoresRouter from "./routes/repartidores.routes.js";
 app.use(cors());
 
 app.use(expres.json());
 
 app.use("/pedidos", pedidosRouter);
 app.use("/productos", productoRouter);
+app.use("/repartidores", repartidoresRouter);
 
 const swaggerFilePath = path.resolve("./src/swagger-output.json");
 

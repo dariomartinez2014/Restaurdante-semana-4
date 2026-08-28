@@ -40,7 +40,7 @@ export async function getProductos(req: Request, res: Response) {
     console.error("Error al consultar productos:", error);
 
     return res.status(500).json({
-      message: "Error en la conexión del servidor"
+      message: "Error en la conexión del servidor",
     });
   }
 }

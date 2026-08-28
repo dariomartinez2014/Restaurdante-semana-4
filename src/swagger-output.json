@@ -277,7 +277,7 @@
           {
             "name": "pagina",
             "in": "query",
-            "description": "Número de página a consultar",
+            "description": "Pon el numero de pagina",
             "default": 1,
             "schema": {
               "type": "integer"
@@ -388,6 +388,302 @@
               "type": "string"
             },
             "description": "SE DEBE INGRESAR LA ID DEL PRODUCTO A ELIMINAR"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/repartidores/": {
+      "get": {
+        "tags": [
+          "Repartidores"
+        ],
+        "summary": "Obtener lista de repartidores con filtros y paginación",
+        "description": "",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "query",
+            "description": "Filtrar por nombre (búsqueda parcial)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehiculo",
+            "in": "query",
+            "description": "Filtrar por tipo de vehículo (ej: Motocicleta, Bicicleta)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activo",
+            "in": "query",
+            "description": "Filtrar por estado activo",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Número de página (por defecto: 1)",
+            "default": 1,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "description": "Cantidad de elementos por página (por defecto: 10)",
+            "default": 10,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "description": "Campo por el cual ordenar los resultados",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "nombre",
+                "vehiculo"
+              ]
+            },
+            "default": "id",
+            "required": false
+          },
+          {
+            "name": "orderDir",
+            "in": "query",
+            "description": "Dirección del ordenamiento",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            },
+            "default": "ASC",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Repartidores"
+        ],
+        "summary": "Registrar un nuevo repartidor",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos requeridos para la creación del repartidor",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Carlos Mamani"
+                },
+                "vehiculo": {
+                  "type": "string",
+                  "example": "Motocicleta"
+                },
+                "telefono": {
+                  "type": "string",
+                  "example": "71234567"
+                },
+                "activo": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "pedidosAsignados": {
+                  "type": "array",
+                  "example": [
+                    101,
+                    102
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "nombre",
+                "vehiculo",
+                "telefono",
+                "activo",
+                "pedidosAsignados"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/repartidores/{id}": {
+      "get": {
+        "tags": [
+          "Repartidores"
+        ],
+        "summary": "Obtener un repartidor por su ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID numérico del repartidor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Repartidores"
+        ],
+        "summary": "Actualizar los datos de un repartidor existente",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID numérico del repartidor a actualizar"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Campos opcionales a modificar (envía al menos uno)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Carlos Mamani"
+                },
+                "vehiculo": {
+                  "type": "string",
+                  "example": "Bicicleta"
+                },
+                "telefono": {
+                  "type": "string",
+                  "example": "71234567"
+                },
+                "activo": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "pedidosAsignados": {
+                  "type": "array",
+                  "example": [
+                    103
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Repartidores"
+        ],
+        "summary": "Eliminar un repartidor por su ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID numérico del repartidor a eliminar"
           }
         ],
         "responses": {
